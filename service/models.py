@@ -8,8 +8,6 @@ import logging
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 
-
-
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
@@ -25,17 +23,20 @@ def init_db(app):
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
 
+
 class RecommendationType(Enum):
     """ Enumeration of recommendation type """
     UP_SELL = 1
     CROSS_SELL = 2
     ACCESSORY = 3
 
+
 class RecommendationStatus(Enum):
     "" "Enumeration of recommendation status """
     VALID = "valid"
     OUT_OF_STOCK = "out of stock"
     DEPRECATED = "deprecated"
+
 
 class Recommendation(db.Model):
     """
@@ -58,7 +59,7 @@ class Recommendation(db.Model):
     )
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, onupdate=datetime.datetime.utcnow)
- 
+
     def __repr__(self):
         return f"<Recommendation {self.name} id=[{self.id}]>"
 
@@ -86,7 +87,16 @@ class Recommendation(db.Model):
 
     def serialize(self):
         """ Serializes a Recommendation into a dictionary """
-        return {"id": self.id, "name": self.name}
+        return {
+            "id": self.recommendation_id,
+            "source_item_id": self.source_item_id,
+            "target_item_id": self.target_item_id,
+            "recommendation_type": self.recommendation_type.name,
+            "recommendation_weight": self.recommendation_weight,
+            "status": self.status.value,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
+        }
 
     def deserialize(self, data):
         """
@@ -96,7 +106,15 @@ class Recommendation(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"]
+            self.source_item_id = data["source_item_id"]
+            self.target_item_id = data["target_item_id"]
+            self.recommendation_type = RecommendationType[data["recommendation_type"].upper()]
+            self.recommendation_weight = data["recommendation_weight"]
+            self.status = RecommendationStatus[data["status"].replace("-", "_").upper()]
+            if "created_at" in data:
+                self.created_at = data["created_at"]
+            if "updated_at" in data:
+                self.updated_at = data["updated_at"]
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Recommendation: missing " + error.args[0]
