@@ -40,10 +40,15 @@ class YourResourceModel(db.Model):
         """
         Creates a YourResourceModel to the database
         """
-        logger.info("Creating %s", self.name)
-        self.id = None  # pylint: disable=invalid-name
-        db.session.add(self)
-        db.session.commit()
+        try:
+            logger.info("Attempting to create Recommendation with ID %s", self.recommendation_id)
+            db.session.add(self)
+            db.session.commit()
+            logger.info("Successfully created Recommendation with ID %s", self.recommendation_id)
+        except Exception as e:
+            logger.error("Error creating Recommendation: %s", e)
+            db.session.rollback()
+            raise DataValidationError("Error creating Recommendation: " + str(e)) from e
 
     def update(self):
         """
