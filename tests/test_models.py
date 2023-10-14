@@ -50,7 +50,7 @@ class TestRecommendation(unittest.TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_create_recommendation(self):
+    def test_create_recommendation_old(self):
         """Create a recommendation and assert that it exists"""
         recommendation = Recommendation(
             source_item_id=123,
@@ -63,8 +63,6 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.id, None)
         self.assertEqual(recommendation.source_item_id, 123)
         self.assertEqual(recommendation.target_item_id, 456)
-        self.assertEqual(
-            recommendation.recommendation_type, RecommendationType.UP_SELL.name
-        )
+        self.assertEqual(recommendation.recommendation_type, RecommendationType.UP_SELL)
         self.assertEqual(recommendation.recommendation_weight, 0.8)
-        self.assertEqual(recommendation.status, RecommendationStatus.VALID.name)
+        self.assertEqual(recommendation.status, RecommendationStatus.VALID)
