@@ -3,7 +3,7 @@ Models for Recommendation
 
 All of the models are stored in this module
 """
-import datetime
+from datetime import datetime
 import logging
 from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
@@ -16,26 +16,31 @@ db = SQLAlchemy()
 
 # Function to initialize the database
 def init_db(app):
-    """ Initializes the SQLAlchemy app """
+    """Initializes the SQLAlchemy app"""
     Recommendation.init_db(app)
 
 
 class DataValidationError(Exception):
-    """ Used for an data validation errors when deserializing """
+    """Used for an data validation errors when deserializing"""
 
 
 class RecommendationType(Enum):
-    """ Enumeration of recommendation type """
+    """Enumeration of recommendation type"""
+
+    UNKNOWN = 0
     UP_SELL = 1
     CROSS_SELL = 2
     ACCESSORY = 3
+    COMPLEMENTARY = 4
+    SUBSTITUTE = 5
 
 
 class RecommendationStatus(Enum):
-    "" "Enumeration of recommendation status """
-    VALID = "valid"
-    OUT_OF_STOCK = "out of stock"
-    DEPRECATED = "deprecated"
+    "" "Enumeration of recommendation status " ""
+    UNKNOWN = 0
+    VALID = 1
+    OUT_OF_STOCK = 2
+    DEPRECATED = 3
 
 
 class Recommendation(db.Model):
@@ -46,19 +51,31 @@ class Recommendation(db.Model):
     app = None
     __tablename__ = "recommendation"
 
+    ##################################################
     # Table Schema
-    recommendation_id = db.Column(db.Integer, primary_key=True)
+    ##################################################
+    id = db.Column(db.Integer, primary_key=True)
     source_item_id = db.Column(db.Integer, nullable=False)
     target_item_id = db.Column(db.Integer, nullable=False)
     recommendation_type = db.Column(
-        db.Enum(RecommendationType), server_default=(RecommendationType.UP_SELL.name)
+        db.Enum(RecommendationType),
+        nullable=False,
+        server_default=(RecommendationType.UNKNOWN.name),
     )
     recommendation_weight = db.Column(db.Float, nullable=False, default=0.0)
     status = db.Column(
-        db.Enum(RecommendationStatus), nullable=False, server_default=RecommendationStatus.VALID.value
+        db.Enum(RecommendationStatus),
+        nullable=False,
+        server_default=RecommendationStatus.UNKNOWN.name,
     )
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    updated_at = db.Column(db.DateTime, onupdate=datetime.datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    ##################################################
+    # INSTANCE METHODS
+    ##################################################
 
     def __repr__(self):
         return f"<Recommendation {self.name} id=[{self.id}]>"
@@ -68,10 +85,12 @@ class Recommendation(db.Model):
         Creates a Recommendation to the database
         """
         try:
-            logger.info("Attempting to create Recommendation with ID %s", self.recommendation_id)
+            logger.info("Attempting to create Recommendation with ID %s", self.id)
+            # id must be none to generate next primary key
+            self.id = None  # pylint: disable=invalid-name
             db.session.add(self)
             db.session.commit()
-            logger.info("Successfully created Recommendation with ID %s", self.recommendation_id)
+            logger.info("Successfully created Recommendation with ID %s", self.id)
         except Exception as e:
             logger.error("Error creating Recommendation: %s", e)
             db.session.rollback()
@@ -85,22 +104,22 @@ class Recommendation(db.Model):
         db.session.commit()
 
     def delete(self):
-        """ Removes a Recommendation from the data store """
+        """Removes a Recommendation from the data store"""
         logger.info("Deleting %s", self.name)
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
-        """ Serializes a Recommendation into a dictionary """
+        """Serializes a Recommendation into a dictionary"""
         return {
-            "id": self.recommendation_id,
+            "id": self.id,
             "source_item_id": self.source_item_id,
             "target_item_id": self.target_item_id,
             "recommendation_type": self.recommendation_type.name,
             "recommendation_weight": self.recommendation_weight,
-            "status": self.status.value,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at
+            "status": self.status.name,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
 
     def deserialize(self, data):
@@ -113,16 +132,20 @@ class Recommendation(db.Model):
         try:
             self.source_item_id = data["source_item_id"]
             self.target_item_id = data["target_item_id"]
-            self.recommendation_type = RecommendationType[data["recommendation_type"].upper()]
+            if "recommendation_type" in data:
+                self.recommendation_type = RecommendationType[
+                    data["recommendation_type"].upper()
+                ]
             self.recommendation_weight = data["recommendation_weight"]
-            self.status = RecommendationStatus[data["status"].replace("-", "_").upper()]
+            if "status" in data:
+                self.status = RecommendationStatus[data["status"].upper()]
             if "created_at" in data:
-                self.created_at = data["created_at"]
+                self.created_at = datetime.fromisoformat(data["created_at"])
             if "updated_at" in data:
-                self.updated_at = data["updated_at"]
+                self.updated_at = datetime.fromisoformat(data["updated_at"])
         except KeyError as error:
             raise DataValidationError(
-                "Invalid Recommendation: missing " + error.args[0]
+                "Invalid Recommendation Type or Status : missing " + error.args[0]
             ) from error
         except TypeError as error:
             raise DataValidationError(
@@ -131,9 +154,13 @@ class Recommendation(db.Model):
             ) from error
         return self
 
+    ##################################################
+    # CLASS METHODS
+    ##################################################
+
     @classmethod
     def init_db(cls, app):
-        """ Initializes the database session """
+        """Initializes the database session"""
         logger.info("Initializing database")
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
@@ -143,22 +170,87 @@ class Recommendation(db.Model):
 
     @classmethod
     def all(cls):
-        """ Returns all of the Recommendation in the database """
+        """Returns all of the Recommendation in the database"""
         logger.info("Processing all Recommendation")
         return cls.query.all()
 
     @classmethod
-    def find(cls, by_id):
-        """ Finds a Recommendation by it's ID """
-        logger.info("Processing lookup for id %s ...", by_id)
-        return cls.query.get(by_id)
+    def find(cls, id: int):
+        """Finds a Recommendation by it's ID"""
+        logger.info("Processing lookup for id %s ...", id)
+        return cls.query.get(id)
 
     @classmethod
-    def find_by_name(cls, name):
-        """Returns all Recommendation with the given name
+    def find_or_404(cls, id: int):
+        """Find a Recommendation by it's id"""
 
-        Args:
-            name (string): the name of the Recommendation you want to match
+        logger.info("Processing lookup or 404 for id %s ...", id)
+        return cls.query.get_or_404(id)
+
+    @classmethod
+    def find_by_source_item_id(cls, source_item_id: int) -> list:
+        """Returns all Recommendation with the given source_item_id"""
+        logger.info("Processing source_id query for %s ...", source_item_id)
+        return cls.query.filter(cls.source_item_id == source_item_id)
+
+    @classmethod
+    def find_by_target_item_id(cls, target_item_id: int) -> list:
+        """Returns all Recommendation with the given target_item_id"""
+        logger.info("Processing source_id query for %s ...", target_item_id)
+        return cls.query.filter(cls.target_item_id == target_item_id)
+
+    @classmethod
+    def find_by_recommendation_type(
+        cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
+    ) -> list:
+        """Returns all Recommendations by their Type
+
+        :param recommendation_type: values are ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
+        :type available: enum
+
+        :return: a collection of Recommendations that are available
+        :rtype: list
+
         """
-        logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
+        logger.info("Processing gender query for %s ...", recommendation_type.name)
+        return cls.query.filter(cls.recommendation_type == recommendation_type)
+
+    @classmethod
+    def find_by_recommendation_status(
+        cls, recommendation_status: RecommendationStatus = RecommendationStatus.UNKNOWN
+    ) -> list:
+        """Returns all Recommendations by their Status
+
+        :param recommendation_type: values are ['UNKNOWN', 'VALID', 'OUT_OF_STOCK', 'DEPRECATED']
+
+        :type available: enum
+
+        :return: a collection of Recommendations that are available
+        :rtype: list
+
+        """
+        logger.info("Processing gender query for %s ...", recommendation_status.value)
+        return cls.query.filter(cls.status == recommendation_status)
+
+
+# TODO
+
+# find_top5_by_source_item_id
+
+# find_top5_by_target_item_id
+
+# find_by_source_item_name_fuzzy
+
+# find_by_target_item_name_fuzzy
+
+# find_top5_by_source_item_name_fuzzy
+
+# find_top5_by_target_item_name_fuzzy
+
+# find_item_created_after
+
+# find_item_created_before
+
+# find_item_updated_after
+
+# find_item_updated_before
