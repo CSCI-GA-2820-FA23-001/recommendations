@@ -1,10 +1,20 @@
 """
 Test cases for Recommendation Model
 
+Test cases can be run with:
+    nosetests
+    coverage report -m
+
+While debugging just these tests it's convenient to use this:
+    nosetests --stop tests/test_pets.py:TestPetModel
+    
 """
 import os
 import logging
 import unittest
+from datetime import datetime
+from werkzeug.exceptions import NotFound
+
 from service.models import (
     Recommendation,
     DataValidationError,
@@ -12,6 +22,8 @@ from service.models import (
     RecommendationStatus,
     RecommendationType,
 )
+
+from service import app
 from tests.factories import RecommendationFactory
 
 DATABASE_URI = os.getenv(
@@ -30,28 +42,32 @@ class TestRecommendation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
-        pass
+        app.config["TESTING"] = True
+        app.config["DEBUG"] = False
+        app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        app.logger.setLevel(logging.CRITICAL)
+        Recommendation.init_db(app)
 
     @classmethod
     def tearDownClass(cls):
         """This runs once after the entire test suite"""
-        pass
+        db.session.close()
 
     def setUp(self):
         """This runs before each test"""
-        db.drop_all()  # remove all data from previous tests
-        db.create_all()  # create tables for our data models
+        db.session.query(Recommendation).delete()  # clean up the last tests
+        db.session.commit()
 
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()  # clean up the session
-        db.drop_all()  # tear down the database table
+        # db.drop_all()  # tear down the database table
 
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_create_recommendation_old(self):
+    def test_create_recommendation(self):
         """Create a recommendation and assert that it exists"""
         recommendation = Recommendation(
             source_item_id=123,
@@ -67,6 +83,18 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.recommendation_type, RecommendationType.UP_SELL)
         self.assertEqual(recommendation.recommendation_weight, 0.8)
         self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+        recommendation = Recommendation(
+            source_item_id=123,
+            target_item_id=456,
+            recommendation_type=RecommendationType.CROSS_SELL,
+            recommendation_weight=0.7,
+            status=RecommendationStatus.DEPRECATED,
+        )
+        self.assertEqual(
+            recommendation.recommendation_type, RecommendationType.CROSS_SELL
+        )
+        self.assertEqual(recommendation.recommendation_weight, 0.7)
+        self.assertEqual(recommendation.status, RecommendationStatus.DEPRECATED)
 
     def test_read_a_recommendation_by_id(self):
         """It should Read a Recommendation by id"""
