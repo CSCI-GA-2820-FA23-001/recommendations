@@ -26,6 +26,7 @@ class DataValidationError(Exception):
 
 class RecommendationType(Enum):
     """Enumeration of recommendation type"""
+
     UNKNOWN = 0
     UP_SELL = 1
     CROSS_SELL = 2
@@ -35,11 +36,12 @@ class RecommendationType(Enum):
 
 
 class RecommendationStatus(Enum):
-    """Enumeration of recommendation status"""
+    "" "Enumeration of recommendation status " ""
     UNKNOWN = 0
     VALID = 1
     OUT_OF_STOCK = 2
     DEPRECATED = 3
+
 
 class Recommendation(db.Model):
     """
@@ -94,14 +96,11 @@ class Recommendation(db.Model):
             db.session.rollback()
             raise DataValidationError("Error creating Recommendation: " + str(e)) from e
 
-    def update(self, payload: dict):
+    def update(self):
         """
-        Manually updates a Recommendation to the database
-        
-        Args:
-            payload: dict, fields and values that need to be updated; must contain field id
+        Updates a Recommendation to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving %s", self.id)
         db.session.commit()
 
     def delete(self):
