@@ -147,3 +147,17 @@ class TestRecommendation(unittest.TestCase):
     #         recommendation.recommendation_weight,
     #     )
     #     self.assertEqual(found_recommendation.status, recommendation.status)
+
+    def test_update_recommendation_target_item_id(self):
+        '''create and update recommendation target_item_id, '''
+        recommendation = Recommendation(
+            source_item_id=123,
+            target_item_id=456,
+            recommendation_type=RecommendationType.UP_SELL,
+            recommendation_weight=0.8,
+            status=RecommendationStatus.VALID,
+        )
+        recommendation.update({'source_item_id': 789, 'recommendation_weight': 0.2})
+        self.assertEqual(recommendation.source_item_id, 789)
+        self.assertEqual(recommendation.recommendation_weight, 0.2)
+        
