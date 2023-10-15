@@ -78,7 +78,7 @@ class Recommendation(db.Model):
     ##################################################
 
     def __repr__(self):
-        return f"<Recommendation with id=[{self.id}]>"
+        return f"<Recommendation {self.name} id=[{self.id}]>"
 
     def create(self):
         """
