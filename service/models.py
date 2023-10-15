@@ -190,13 +190,13 @@ class Recommendation(db.Model):
     @classmethod
     def find_by_source_item_id(cls, source_item_id: int) -> list:
         """Returns all Recommendation with the given source_item_id"""
-        logger.info("Processing source_id query for %s ...", source_item_id)
+        logger.info("Processing source_item_id query for %s ...", source_item_id)
         return cls.query.filter(cls.source_item_id == source_item_id)
 
     @classmethod
     def find_by_target_item_id(cls, target_item_id: int) -> list:
         """Returns all Recommendation with the given target_item_id"""
-        logger.info("Processing source_id query for %s ...", target_item_id)
+        logger.info("Processing target_item_id query for %s ...", target_item_id)
         return cls.query.filter(cls.target_item_id == target_item_id)
 
     @classmethod
@@ -212,7 +212,9 @@ class Recommendation(db.Model):
         :rtype: list
 
         """
-        logger.info("Processing gender query for %s ...", recommendation_type.name)
+        logger.info(
+            "Processing recommendation type query for %s ...", recommendation_type.name
+        )
         return cls.query.filter(cls.recommendation_type == recommendation_type)
 
     @classmethod
@@ -229,7 +231,7 @@ class Recommendation(db.Model):
         :rtype: list
 
         """
-        logger.info("Processing gender query for %s ...", recommendation_status.value)
+        logger.info("Processing status query for %s ...", recommendation_status.value)
         return cls.query.filter(cls.status == recommendation_status)
 
 
