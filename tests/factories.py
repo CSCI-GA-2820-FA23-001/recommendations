@@ -18,24 +18,24 @@ Test Factory to make fake objects for testing
 from datetime import datetime
 
 import factory
-from factory.fuzzy import FuzzyInteger, FuzzyChoice, FuzzyFloat, FuzzyDateTime
+from factory.fuzzy import FuzzyInteger, FuzzyChoice, FuzzyFloat
 from service.models import Recommendation, RecommendationType, RecommendationStatus
 
 
 class RecommendationFactory(factory.Factory):
-    """Creates fake pets that you don't have to feed"""
+    """Creates fake recommendation that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps factory to data model"""
 
         model = Recommendation
 
-    recommendation_id = factory.Sequence(lambda n: n)
+    id = factory.Sequence(lambda n: n)
 
     source_item_id = FuzzyInteger(1, 200)
 
-    # generate a target_item_id different from source_item_id
-    target_item_id = FuzzyInteger(source_item_id + 1, 300)
+    # should generate a target_item_id different from source_item_id
+    target_item_id = FuzzyInteger(1, 200)
 
     recommendation_type = FuzzyChoice(
         choices=[
@@ -48,7 +48,7 @@ class RecommendationFactory(factory.Factory):
         ]
     )
 
-    recommendation_weight = FuzzyFloat(0, 1)
+    recommendation_weight: float = FuzzyFloat(0, 1)
 
     status = FuzzyChoice(
         choices=[
@@ -59,6 +59,5 @@ class RecommendationFactory(factory.Factory):
         ]
     )
 
-    created_at = FuzzyDateTime(datetime(2022, 1, 1), datetime(2023, 9, 14))
-
-    updated_at = FuzzyDateTime(created_at, datetime(2023, 12, 31))
+    created_at = factory.LazyFunction(datetime.utcnow)
+    updated_at = factory.LazyFunction(datetime.utcnow)
