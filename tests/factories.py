@@ -23,7 +23,7 @@ from service.models import Recommendation, RecommendationType, RecommendationSta
 
 
 class RecommendationFactory(factory.Factory):
-    """Creates fake pets that you don't have to feed"""
+    """Creates fake recommendation that you don't have to feed"""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps factory to data model"""
