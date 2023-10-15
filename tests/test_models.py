@@ -121,29 +121,20 @@ class TestRecommendation(unittest.TestCase):
         )
         self.assertEqual(found_recommendation.status, recommendation.status)
 
-    # def test_read_a_recommendation_by_source_item_id(self):
-    #     """It should Read a Recommendation by id"""
-    #     recommendation = RecommendationFactory()
-    #     logging.debug(recommendation)
-    #     recommendation.source_item_id = None
-    #     recommendation.create()
-    #     self.assertIsNotNone(recommendation.source_item_id)
-    #     # Fetch it back
-    #     found_recommendation = Recommendation.find_by_source_item_id(recommendation.id)
-
-    #     self.assertTrue(recommendation is not None)
-    #     self.assertEqual(found_recommendation.id, recommendation.id)
-    #     self.assertEqual(
-    #         found_recommendation.source_item_id, recommendation.source_item_id
-    #     )
-    #     self.assertEqual(
-    #         found_recommendation.target_item_id, recommendation.target_item_id
-    #     )
-    #     self.assertEqual(
-    #         found_recommendation.recommendation_type, recommendation.recommendation_type
-    #     )
-    #     self.assertEqual(
-    #         found_recommendation.recommendation_weight,
-    #         recommendation.recommendation_weight,
-    #     )
-    #     self.assertEqual(found_recommendation.status, recommendation.status)
+    def test_find_by_source_item_id(self):
+        """It should find Recommendations by source product id"""
+        recommendations = RecommendationFactory.create_batch(10)
+        for recommendation in recommendations:
+            recommendation.create()
+        source_item_id = recommendations[0].source_item_id
+        count = len(
+            [
+                recommendation
+                for recommendation in recommendations
+                if recommendation.source_item_id == source_item_id
+            ]
+        )
+        found = Recommendation.find_by_source_item_id(source_item_id)
+        self.assertEqual(found.count(), count)
+        for recommendation in found:
+            self.assertEqual(recommendation.source_item_id, source_item_id)
