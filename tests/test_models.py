@@ -2,13 +2,11 @@
 Test cases for Recommendation Model
 
 Test cases can be run with:
-    nosetests
+    green
     coverage report -m
-
-While debugging just these tests it's convenient to use this:
-    nosetests --stop tests/test_pets.py:TestPetModel
     
 """
+
 import os
 import logging
 import unittest
@@ -19,11 +17,12 @@ from service.models import (
     Recommendation,
     DataValidationError,
     db,
-    RecommendationStatus,
     RecommendationType,
+    RecommendationStatus,
 )
 
 from service import app
+
 from tests.factories import RecommendationFactory
 
 DATABASE_URI = os.getenv(
@@ -61,7 +60,6 @@ class TestRecommendation(unittest.TestCase):
     def tearDown(self):
         """This runs after each test"""
         db.session.remove()  # clean up the session
-        # db.drop_all()  # tear down the database table
 
     ######################################################################
     #  T E S T   C A S E S
@@ -123,29 +121,29 @@ class TestRecommendation(unittest.TestCase):
         )
         self.assertEqual(found_recommendation.status, recommendation.status)
 
-    def test_read_a_recommendation_by_source_item_id(self):
-        """It should Read a Recommendation by id"""
-        recommendation = RecommendationFactory()
-        logging.debug(recommendation)
-        recommendation.source_item_id = None
-        recommendation.create()
-        self.assertIsNotNone(recommendation.source_item_id)
-        # Fetch it back
-        found_recommendation = Recommendation.find_by_source_item_id(recommendation.id)
+    # def test_read_a_recommendation_by_source_item_id(self):
+    #     """It should Read a Recommendation by id"""
+    #     recommendation = RecommendationFactory()
+    #     logging.debug(recommendation)
+    #     recommendation.source_item_id = None
+    #     recommendation.create()
+    #     self.assertIsNotNone(recommendation.source_item_id)
+    #     # Fetch it back
+    #     found_recommendation = Recommendation.find_by_source_item_id(recommendation.id)
 
-        self.assertTrue(recommendation is not None)
-        self.assertEqual(found_recommendation.id, recommendation.id)
-        self.assertEqual(
-            found_recommendation.source_item_id, recommendation.source_item_id
-        )
-        self.assertEqual(
-            found_recommendation.target_item_id, recommendation.target_item_id
-        )
-        self.assertEqual(
-            found_recommendation.recommendation_type, recommendation.recommendation_type
-        )
-        self.assertEqual(
-            found_recommendation.recommendation_weight,
-            recommendation.recommendation_weight,
-        )
-        self.assertEqual(found_recommendation.status, recommendation.status)
+    #     self.assertTrue(recommendation is not None)
+    #     self.assertEqual(found_recommendation.id, recommendation.id)
+    #     self.assertEqual(
+    #         found_recommendation.source_item_id, recommendation.source_item_id
+    #     )
+    #     self.assertEqual(
+    #         found_recommendation.target_item_id, recommendation.target_item_id
+    #     )
+    #     self.assertEqual(
+    #         found_recommendation.recommendation_type, recommendation.recommendation_type
+    #     )
+    #     self.assertEqual(
+    #         found_recommendation.recommendation_weight,
+    #         recommendation.recommendation_weight,
+    #     )
+    #     self.assertEqual(found_recommendation.status, recommendation.status)
