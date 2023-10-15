@@ -78,7 +78,7 @@ class Recommendation(db.Model):
     ##################################################
 
     def __repr__(self):
-        return f"<Recommendation {self.name} id=[{self.id}]>"
+        return f"<Recommendation with id=[{self.id}]>"
 
     def create(self):
         """
@@ -100,12 +100,12 @@ class Recommendation(db.Model):
         """
         Updates a Recommendation to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving %s", self.id)
         db.session.commit()
 
     def delete(self):
         """Removes a Recommendation from the data store"""
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting %s", self.id)
         db.session.delete(self)
         db.session.commit()
 
