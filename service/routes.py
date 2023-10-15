@@ -91,25 +91,17 @@ def get_recommendations(id):
     return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 
-@app.route("/recommendations/<int:source_item_id>", methods=["GET"])
+@app.route("/recommendations/source_product_<int:source_item_id>", methods=["GET"])
 def read_recommendations_by_source_type(source_item_id):
     """
-    Read a single Recommendation based on the source product they select
-    This endpoint will return a Recommendation based on it's id
+    Read a list of recommendations based on the source product they select
     """
-    app.logger.info(
-        "Request for recommendation with source product: %s", source_item_id
-    )
-    recommendation = Recommendation.find_by_source_item_id(source_item_id)
-    if not recommendation:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Recommendation with source product id '{source_item_id}' was not found.",
-        )
-
-    app.logger.info("Returning recommendation: %s", recommendation.source_item_id)
-
-    return jsonify(recommendation.serialize()), status.HTTP_200_OK
+    app.logger.info("Request for recommendations list based on source product")
+    recommendations = []
+    recommendations = Recommendation.find_by_source_item_id(source_item_id)
+    results = [recommendation.serialize() for recommendation in recommendations]
+    app.logger.info("Returning %d recommendations", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################
