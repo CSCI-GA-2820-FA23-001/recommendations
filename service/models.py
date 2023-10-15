@@ -101,21 +101,9 @@ class Recommendation(db.Model):
         Args:
             payload: dict, fields and values that need to be updated; must contain field id
         """
-        logger.info("Updating %s", self.id)
-        try:
-            logger.info("Attempting to update Recommendation with ID %s", self.id)
-            for key, value in payload.items():
-                if hasattr(self, key):
-                    setattr(self, key, value)
-                else:
-                    raise KeyError(f"malformed payload object with field {key}")
-            db.session.commit()
-            logger.info("Successfully updated Recommendation with ID %s", self.id)
-        except Exception as e:
-            logger.error("Error updating Recommendation: %s", e)
-            db.session.rollback()
-            raise DataValidationError("Error updating Recommendation: " + str(e)) from e
-        
+        logger.info("Saving %s", self.name)
+        db.session.commit()
+
     def delete(self):
         """Removes a Recommendation from the data store"""
         logger.info("Deleting %s", self.id)
