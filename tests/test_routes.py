@@ -68,7 +68,7 @@ class TestRecommendationServer(TestCase):
             self.assertEqual(
                 response.status_code,
                 status.HTTP_201_CREATED,
-                "Could not create test pet",
+                "Could not create test recommendation",
             )
             new_recommendation = response.get_json()
             test_recommendation.id = new_recommendation["id"]
@@ -101,3 +101,29 @@ class TestRecommendationServer(TestCase):
     ######################################################################
     #  T E S T   A C T I O N S
     ######################################################################
+
+    def test_get_recommendations(self):
+        """It should Get a recommendation by its id"""
+        # get the id of a pet
+        test_recommendation = self._create_recommendations(1)[0]
+        response = self.client.get(f"{BASE_URL}/{test_recommendation.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["id"], test_recommendation.id)
+
+    def test_read_recommendations_by_source_item_id(self):
+        """It should Get a list recommendations by its source product id"""
+        recommendations = self._create_recommendations(5)
+        test_source_item_id = recommendations[0].source_item_id
+        category_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.source_item_id == test_source_item_id
+        ]
+        response = self.client.get(f"{BASE_URL}/source_product_{test_source_item_id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(category_recommendations))
+        # check the data just to be sure
+        for recommendation in data:
+            self.assertEqual(recommendation["source_item_id"], test_source_item_id)
