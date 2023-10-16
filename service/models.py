@@ -26,6 +26,7 @@ class DataValidationError(Exception):
 
 class RecommendationType(Enum):
     """Enumeration of recommendation type"""
+
     UNKNOWN = 0
     UP_SELL = 1
     CROSS_SELL = 2
@@ -36,10 +37,12 @@ class RecommendationType(Enum):
 
 class RecommendationStatus(Enum):
     """Enumeration of recommendation status"""
+
     UNKNOWN = 0
     VALID = 1
     OUT_OF_STOCK = 2
     DEPRECATED = 3
+
 
 class Recommendation(db.Model):
     """
@@ -97,7 +100,7 @@ class Recommendation(db.Model):
     def update(self, payload: dict):
         """
         Manually updates a Recommendation to the database
-        
+
         Args:
             payload: dict, fields and values that need to be updated; must contain field id
         """
@@ -108,14 +111,16 @@ class Recommendation(db.Model):
                 if hasattr(self, key):
                     setattr(self, key, value)
                 else:
-                    raise DataValidationError(f"Malformed payload with invalid field {key}")
+                    raise DataValidationError(
+                        f"Malformed payload with invalid field {key}"
+                    )
             db.session.commit()
             logger.info("Successfully updated Recommendation with ID %s", self.id)
         except Exception as e:
             logger.error("Error updating Recommendation: %s", e)
             db.session.rollback()
             raise DataValidationError("Error updating Recommendation: " + str(e)) from e
-        
+
     def delete(self):
         """Removes a Recommendation from the data store"""
         logger.info("Deleting %s", self.id)
@@ -205,49 +210,49 @@ class Recommendation(db.Model):
         logger.info("Processing source id query for %s ...", source_item_id)
         return cls.query.filter(cls.source_item_id == source_item_id)
 
-    @classmethod
-    def find_by_target_item_id(cls, target_item_id: int) -> list:
-        """Returns all Recommendation with the given target_item_id"""
-        logger.info("Processing target item id query for %s ...", target_item_id)
-        return cls.query.filter(cls.target_item_id == target_item_id)
+    # @classmethod
+    # def find_by_target_item_id(cls, target_item_id: int) -> list:
+    #     """Returns all Recommendation with the given target_item_id"""
+    #     logger.info("Processing target item id query for %s ...", target_item_id)
+    #     return cls.query.filter(cls.target_item_id == target_item_id)
 
-    @classmethod
-    def find_by_recommendation_type(
-        cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
-    ) -> list:
-        """Returns all Recommendations by their Type
+    # @classmethod
+    # def find_by_recommendation_type(
+    #     cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
+    # ) -> list:
+    #     """Returns all Recommendations by their Type
 
-        :param recommendation_type: values are ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
-        :type available: enum
+    #     :param recommendation_type: values are ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
+    #     :type available: enum
 
-        :return: a collection of Recommendations that are available
-        :rtype: list
+    #     :return: a collection of Recommendations that are available
+    #     :rtype: list
 
-        """
-        logger.info(
-            "Processing recommendation type query for %s ...", recommendation_type.name
-        )
-        return cls.query.filter(cls.recommendation_type == recommendation_type)
+    #     """
+    #     logger.info(
+    #         "Processing recommendation type query for %s ...", recommendation_type.name
+    #     )
+    #     return cls.query.filter(cls.recommendation_type == recommendation_type)
 
-    @classmethod
-    def find_by_recommendation_status(
-        cls, recommendation_status: RecommendationStatus = RecommendationStatus.UNKNOWN
-    ) -> list:
-        """Returns all Recommendations by their Status
+    # @classmethod
+    # def find_by_recommendation_status(
+    #     cls, recommendation_status: RecommendationStatus = RecommendationStatus.UNKNOWN
+    # ) -> list:
+    #     """Returns all Recommendations by their Status
 
-        :param recommendation_status: values are ['UNKNOWN', 'VALID', 'OUT_OF_STOCK', 'DEPRECATED']
+    #     :param recommendation_status: values are ['UNKNOWN', 'VALID', 'OUT_OF_STOCK', 'DEPRECATED']
 
-        :type available: enum
+    #     :type available: enum
 
-        :return: a collection of Recommendations that are available
-        :rtype: list
+    #     :return: a collection of Recommendations that are available
+    #     :rtype: list
 
-        """
-        logger.info(
-            "Processing recommendation status query for %s ...",
-            recommendation_status.value,
-        )
-        return cls.query.filter(cls.status == recommendation_status)
+    #     """
+    #     logger.info(
+    #         "Processing recommendation status query for %s ...",
+    #         recommendation_status.value,
+    #     )
+    #     return cls.query.filter(cls.status == recommendation_status)
 
 
 # TODO
