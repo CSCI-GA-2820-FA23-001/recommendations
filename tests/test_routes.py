@@ -60,7 +60,7 @@ class TestRecommendationServer(TestCase):
         db.session.remove()
 
     def _create_recommendations(self, count):
-        """Factory method to create pets in bulk"""
+        """Factory method to create recommendations in bulk"""
         recommendations = []
         for _ in range(count):
             test_recommendation = RecommendationFactory()
@@ -127,3 +127,24 @@ class TestRecommendationServer(TestCase):
         # check the data just to be sure
         for recommendation in data:
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+
+    # def test_create_recommendations(self):
+    #     """Recommendation should be created via POST"""
+    #     response = self.client.post(BASE_URL, json={})
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     data = response.get_json()
+    #     self.assertEqual(data["status"], 200)
+        
+    def test_update_recommendations(self):
+        """Recommendation should be updated via PUT"""
+        recommendations = self._create_recommendations(5)
+        test_id = recommendations[2].id
+        test_weight = recommendations[2].recommendation_weight
+        changed_weight = max(test_weight+0.01, 1)
+        
+        response = self.client.put(BASE_URL, json={'id': test_id, 'data': {'recommendation_weight': changed_weight}})
+        data = response.get_json()
+        self.assertNotEqual(data['recommendation_weight'], test_weight)
+        self.assertEqual(data['recommendation_weight'], changed_weight)
+        self.assertEqual(data['id'], test_id)
+        
