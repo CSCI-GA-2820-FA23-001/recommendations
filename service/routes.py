@@ -1,15 +1,13 @@
 """
 Recommendation Service
 
-Each person needs to modify the routes they have created. Here is the template provided by the professor.
-
 Paths:
 ------
 GET /recommendations - Returns a list all of the Recommendations
-GET /pets/{id} - Returns the Pet with a given id number
+GET /recommendations/{id} - Returns the Recommendation with a given id number
 POST /recommendations - creates a new Recommendation record in the database
 PUT /recommendations - updates a Recommendation record in the database
-DELETE /pets/{id} - deletes a Pet record in the database
+DELETE /recommendations/{id} - deletes a Recommendation record in the database
 
 """
 
@@ -137,34 +135,34 @@ def update_recommendation():
     Update a recommendation
 
     This endpoint will update a recommendation based the body that is posted
-    
+
     payload: {
         id: int (required),
-        data: {(fields to be changed)}    
+        data: {(fields to be changed)}
     }
     """
     check_content_type("application/json")
     payload = request.get_json()
-    if 'id' not in payload:
+    if "id" not in payload:
         raise KeyError("Malformed payload: id is required")
-    if 'data' not in payload:
+    if "data" not in payload:
         raise KeyError("Malformed payload: data is required")
-    recommendation_id = payload['id']
-    
+    recommendation_id = payload["id"]
+
     app.logger.info("Request to update recommendation with id: %s", recommendation_id)
     recommendation = Recommendation.find(recommendation_id)
     if not recommendation:
         abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
 
-    recommendation.update(payload['data'])
+    recommendation.update(payload["data"])
 
     app.logger.info("Recommendation with ID %s updated", recommendation.id)
-       
+
     return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 
 ######################################################################
-# DELETE A PET
+# DELETE A RECOMMENDATION
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["DELETE"])
 def delete_pets(id):

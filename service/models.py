@@ -148,13 +148,34 @@ class Recommendation(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.source_item_id = data["source_item_id"]
-            self.target_item_id = data["target_item_id"]
+            if isinstance(data["source_item_id"], int) and data["source_item_id"] >= 0:
+                self.source_item_id = data["source_item_id"]
+            else:
+                raise DataValidationError(
+                    "Invalid type or invalid value for int [source_item_id]: "
+                    + str(data["source_item_id"])
+                )
+            if isinstance(data["target_item_id"], int) and data["target_item_id"] >= 0:
+                self.target_item_id = data["target_item_id"]
+            else:
+                raise DataValidationError(
+                    "Invalid type or invalid value for int [target_item_id]: "
+                    + str(data["target_item_id"])
+                )
+            if (
+                data["recommendation_weight"] >= 0
+                and data["recommendation_weight"] <= 1
+            ):
+                self.recommendation_weight = data["recommendation_weight"]
+            else:
+                raise DataValidationError(
+                    "Invalid type or invalid value for int [recommendation_weight]: "
+                    + str(data["recommendation_weight"])
+                )
             if "recommendation_type" in data:
                 self.recommendation_type = RecommendationType[
                     data["recommendation_type"].upper()
                 ]
-            self.recommendation_weight = data["recommendation_weight"]
             if "status" in data:
                 self.status = RecommendationStatus[data["status"].upper()]
             if "created_at" in data:
@@ -163,12 +184,12 @@ class Recommendation(db.Model):
                 self.updated_at = datetime.fromisoformat(data["updated_at"])
         except KeyError as error:
             raise DataValidationError(
-                "Invalid Recommendation Type or Status : missing " + error.args[0]
+                "Invalid recommendation: missing or wrong enum value " + error.args[0]
             ) from error
         except TypeError as error:
             raise DataValidationError(
-                "Invalid Recommendation: body of request contained bad or no data - "
-                "Error message: " + error
+                "Invalid recommendation: body of request contained bad or no data "
+                + str(error)
             ) from error
         return self
 
