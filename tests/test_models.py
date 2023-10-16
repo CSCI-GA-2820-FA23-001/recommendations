@@ -139,6 +139,50 @@ class TestRecommendation(unittest.TestCase):
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
 
+    def test_create_recommendation_raise_error(self):
+        """Should raise DataValidationError if required field is not included or wrong type"""
+        recommendation = Recommendation(
+            source_item_id=123,
+            recommendation_type=RecommendationType.UP_SELL,
+            recommendation_weight=0.8,
+            status=RecommendationStatus.VALID,
+        )
+        self.assertRaises(DataValidationError, recommendation.create)
+
+    def test_update_recommendation_target_item_id(self):
+        """create and update recommendation with some data"""
+        recommendation = Recommendation(
+            source_item_id=123,
+            target_item_id=456,
+            recommendation_type=RecommendationType.UP_SELL,
+            recommendation_weight=0.8,
+            status=RecommendationStatus.VALID,
+        )
+        recommendation.update({"source_item_id": 789, "recommendation_weight": 0.2})
+        self.assertEqual(recommendation.source_item_id, 789)
+        self.assertEqual(recommendation.recommendation_weight, 0.2)
+
+    def test_update_recommendation_raise_error(self):
+        """update recommendation with invalid data should raise error"""
+        recommendation = Recommendation(
+            source_item_id=123,
+            target_item_id=456,
+            recommendation_type=RecommendationType.UP_SELL,
+            recommendation_weight=0.8,
+            status=RecommendationStatus.VALID,
+        )
+
+        def test_invalid_field():
+            recommendation.update({"foo": "bar"})
+            recommendation.create()
+
+        def test_invalid_value_type():
+            recommendation.update({"recommendation_weight": "foo"})
+            recommendation.create()
+
+        self.assertRaises(DataValidationError, test_invalid_field)
+        self.assertRaises(DataValidationError, test_invalid_value_type)
+
     def test_delete_a_recommendation(self):
         """It should Delete a Recommendation"""
         recommendation = RecommendationFactory()

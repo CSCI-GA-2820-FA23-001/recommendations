@@ -8,7 +8,7 @@ Paths:
 GET /recommendations - Returns a list all of the Recommendations
 GET /pets/{id} - Returns the Pet with a given id number
 POST /recommendations - creates a new Recommendation record in the database
-PUT /pets/{id} - updates a Pet record in the database
+PUT /recommendations - updates a Recommendation record in the database
 DELETE /pets/{id} - deletes a Pet record in the database
 
 """
@@ -129,28 +129,38 @@ def create_recommendations():
 
 
 ######################################################################
-# UPDATE AN EXISTING PET
+# UPDATE AN EXISTING RECOMMENDATION
 ######################################################################
-# @app.route("/pets/<int:pet_id>", methods=["PUT"])
-# def update_pets(pet_id):
-#     """
-#     Update a Pet
+@app.route("/recommendations", methods=["PUT"])
+def update_recommendation():
+    """
+    Update a recommendation
 
-#     This endpoint will update a Pet based the body that is posted
-#     """
-#     app.logger.info("Request to update pet with id: %s", pet_id)
-#     check_content_type("application/json")
+    This endpoint will update a recommendation based the body that is posted
+    
+    payload: {
+        id: int (required),
+        data: {(fields to be changed)}    
+    }
+    """
+    check_content_type("application/json")
+    payload = request.get_json()
+    if 'id' not in payload:
+        raise KeyError("Malformed payload: id is required")
+    if 'data' not in payload:
+        raise KeyError("Malformed payload: data is required")
+    recommendation_id = payload['id']
+    
+    app.logger.info("Request to update recommendation with id: %s", recommendation_id)
+    recommendation = Recommendation.find(recommendation_id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
 
-#     pet = Pet.find(pet_id)
-#     if not pet:
-#         abort(status.HTTP_404_NOT_FOUND, f"Pet with id '{pet_id}' was not found.")
+    recommendation.update(payload['data'])
 
-#     pet.deserialize(request.get_json())
-#     pet.id = pet_id
-#     pet.update()
-
-#     app.logger.info("Pet with ID [%s] updated.", pet.id)
-#     return jsonify(pet.serialize()), status.HTTP_200_OK
+    app.logger.info("Recommendation with ID %s updated", recommendation.id)
+       
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 
 ######################################################################
