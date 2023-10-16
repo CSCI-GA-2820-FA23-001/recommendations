@@ -108,7 +108,7 @@ class Recommendation(db.Model):
                 if hasattr(self, key):
                     setattr(self, key, value)
                 else:
-                    raise KeyError(f"malformed payload object with field {key}")
+                    raise DataValidationError(f"Malformed payload with invalid field {key}")
             db.session.commit()
             logger.info("Successfully updated Recommendation with ID %s", self.id)
         except Exception as e:
