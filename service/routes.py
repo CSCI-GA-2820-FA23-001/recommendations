@@ -176,7 +176,7 @@ def delete_recommendations(id):
     if recommendation:
         recommendation.delete()
 
-    app.logger.info("Pet with ID [%s] delete complete.", id)
+    app.logger.info("Recommendation with ID [%s] delete complete.", id)
     return "", status.HTTP_204_NO_CONTENT
 
 
