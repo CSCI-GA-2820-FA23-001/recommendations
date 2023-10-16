@@ -156,20 +156,20 @@ def create_recommendations():
 ######################################################################
 # DELETE A PET
 ######################################################################
-# @app.route("/pets/<int:pet_id>", methods=["DELETE"])
-# def delete_pets(pet_id):
-#     """
-#     Delete a Pet
+@app.route("/recommendations/<int:id>", methods=["DELETE"])
+def delete_pets(id):
+    """
+    Delete a Recommendation
 
-#     This endpoint will delete a Pet based the id specified in the path
-#     """
-#     app.logger.info("Request to delete pet with id: %s", pet_id)
-#     pet = Pet.find(pet_id)
-#     if pet:
-#         pet.delete()
+    This endpoint will delete a Recommendation based the id specified in the path
+    """
+    app.logger.info("Request to delete recommendation with id: %s", id)
+    recommendation = Recommendation.find(id)
+    if recommendation:
+        recommendation.delete()
 
-#     app.logger.info("Pet with ID [%s] delete complete.", pet_id)
-#     return "", status.HTTP_204_NO_CONTENT
+    app.logger.info("Pet with ID [%s] delete complete.", id)
+    return "", status.HTTP_204_NO_CONTENT
 
 
 ######################################################################

@@ -138,3 +138,12 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found.count(), count)
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
+
+    def test_delete_a_recommendation(self):
+        """It should Delete a Recommendation"""
+        recommendation = RecommendationFactory()
+        recommendation.create()
+        self.assertEqual(len(Recommendation.all()), 1)
+        # delete the recommendation and make sure it isn't in the database
+        recommendation.delete()
+        self.assertEqual(len(Recommendation.all()), 0)
