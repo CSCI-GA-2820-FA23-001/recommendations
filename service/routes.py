@@ -6,10 +6,10 @@ Each person needs to modify the routes they have created. Here is the template p
 Paths:
 ------
 GET /recommendations - Returns a list all of the Recommendations
-GET /pets/{id} - Returns the Pet with a given id number
+GET /recommendations/{id} - Returns the Recommendation with a given id number
 POST /recommendations - creates a new Recommendation record in the database
 PUT /recommendations - updates a Recommendation record in the database
-DELETE /pets/{id} - deletes a Pet record in the database
+DELETE /recommendations/{id} - deletes a Recommendation record in the database
 
 """
 
@@ -164,7 +164,7 @@ def update_recommendation():
 
 
 ######################################################################
-# DELETE A PET
+# DELETE A Recommendation
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["DELETE"])
 def delete_recommendations(id):
@@ -178,7 +178,7 @@ def delete_recommendations(id):
     if recommendation:
         recommendation.delete()
 
-    app.logger.info("Pet with ID [%s] delete complete.", id)
+    app.logger.info("Recommendation with ID [%s] delete complete.", id)
     return "", status.HTTP_204_NO_CONTENT
 
 
