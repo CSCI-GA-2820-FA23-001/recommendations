@@ -44,25 +44,16 @@ def index():
 
 
 ######################################################################
-# LIST ALL PETS
+# LIST ALL RECOMMENDATIONS
 ######################################################################
-# @app.route("/pets", methods=["GET"])
-# def list_pets():
-#     """Returns all of the Pets"""
-#     app.logger.info("Request for pet list")
-#     pets = []
-#     category = request.args.get("category")
-#     name = request.args.get("name")
-#     if category:
-#         pets = Pet.find_by_category(category)
-#     elif name:
-#         pets = Pet.find_by_name(name)
-#     else:
-#         pets = Pet.all()
-
-#     results = [pet.serialize() for pet in pets]
-#     app.logger.info("Returning %d pets", len(results))
-#     return jsonify(results), status.HTTP_200_OK
+@app.route("/recommendations", methods=["GET"])
+def list_recommendations():
+    """Returns all of the Recommendations"""
+    app.logger.info("Request for recommendation list")
+    recommendations = Recommendation.all()
+    results = [recommendation.serialize() for recommendation in recommendations]
+    app.logger.info("Returning %d recommendations", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################
