@@ -205,18 +205,6 @@ class TestRecommendation(unittest.TestCase):
         recommendation.delete()
         self.assertEqual(len(Recommendation.all()), 0)
 
-    # def test_list_all_pets(self):
-    #     """It should List all Pets in the database"""
-    #     pets = Pet.all()
-    #     self.assertEqual(pets, [])
-    #     # Create 5 Pets
-    #     for _ in range(5):
-    #         pet = PetFactory()
-    #         pet.create()
-    #     # See if we get back 5 pets
-    #     pets = Pet.all()
-    #     self.assertEqual(len(pets), 5)
-
     def test_serialize_a_recommendation(self):
         """It should serialize a Recommendation"""
         recommendation = RecommendationFactory()
@@ -352,3 +340,15 @@ class TestRecommendation(unittest.TestCase):
     def test_find_or_404_not_found(self):
         """It should return 404 not found"""
         self.assertRaises(NotFound, Recommendation.find_or_404, 0)
+
+    def test_list_all_recommendations(self):
+        """It should List all Recommendations in the database"""
+        recs = Recommendation.all()
+        self.assertEqual(recs, [])
+        # Create 5 Recommendations
+        for _ in range(5):
+            rec = RecommendationFactory()
+            rec.create()
+        # See if we get back 5 recs
+        recs = Recommendation.all()
+        self.assertEqual(len(recs), 5)

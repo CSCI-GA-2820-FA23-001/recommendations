@@ -196,6 +196,14 @@ class TestRecommendationServer(TestCase):
         for recommendation in data:
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
 
+    def test_get_recommendation_list(self):
+        """It should Get a list of Recommendations"""
+        self._create_recommendations(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
