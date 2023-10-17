@@ -191,3 +191,15 @@ class TestRecommendation(unittest.TestCase):
         # delete the recommendation and make sure it isn't in the database
         recommendation.delete()
         self.assertEqual(len(Recommendation.all()), 0)
+
+    def test_list_all_recommendations(self):
+        """It should List all Recommendations in the database"""
+        recs = Recommendation.all()
+        self.assertEqual(recs, [])
+        # Create 5 Recommendations
+        for _ in range(5):
+            rec = RecommendationFactory()
+            rec.create()
+        # See if we get back 5 recs
+        recs = Recommendation.all()
+        self.assertEqual(len(recs), 5)
