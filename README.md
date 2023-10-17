@@ -33,7 +33,7 @@ Goals to implement:
 | created_at | TIMESTAMP | Create time |
 | updated_at | TIMESTAMP | Update time |
 
-#### Items
+<!-- #### Items
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
@@ -43,14 +43,14 @@ Goals to implement:
 | price | FLOAT | Price of the item |
 | in_stock | BOOLEAN | Whether in stock |
 | created_at | TIMESTAMP | Create time |
-| updated_at | TIMESTAMP | Update time |
+| updated_at | TIMESTAMP | Update time | -->
 
-#### Categories
+<!-- #### Categories
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
 | id | Key | Primary |
-| name | VARCHAR | Name of the category |
+| name | VARCHAR | Name of the category | -->
 
 ### API List
 
