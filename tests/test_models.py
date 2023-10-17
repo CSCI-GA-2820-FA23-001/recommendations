@@ -4,7 +4,7 @@ Test cases for Recommendation Model
 Test cases can be run with:
     green
     coverage report -m
-    
+
 """
 
 import os
@@ -94,18 +94,18 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.recommendation_weight, 0.7)
         self.assertEqual(recommendation.status, RecommendationStatus.DEPRECATED)
 
-    # def test_add_a_pet(self):
-    #     """It should Create a pet and add it to the database"""
-    #     pets = Pet.all()
-    #     self.assertEqual(pets, [])
-    #     pet = Pet(name="Fido", category="dog", available=True, gender=Gender.MALE)
-    #     self.assertTrue(pet is not None)
-    #     self.assertEqual(pet.id, None)
-    #     pet.create()
-    #     # Assert that it was assigned an id and shows up in the database
-    #     self.assertIsNotNone(pet.id)
-    #     pets = Pet.all()
-    #     self.assertEqual(len(pets), 1)
+    def test_add_a_recommendation(self):
+        """It should Create a recommendation and add it to the database"""
+        # Use RecommendationFactory to create a recommendation
+        recommendation = RecommendationFactory()
+
+        self.assertTrue(recommendation is not None)
+        recommendation.create()
+
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(recommendation.id)
+        recommendations = Recommendation.all()
+        self.assertEqual(len(recommendations), 1)
 
     def test_read_a_recommendation_by_id(self):
         """It should Read a Recommendation by id"""

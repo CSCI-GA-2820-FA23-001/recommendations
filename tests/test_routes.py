@@ -10,7 +10,7 @@ import logging
 from unittest import TestCase
 
 # from unittest.mock import MagicMock, patch
-from urllib.parse import quote_plus
+# from urllib.parse import quote_plus
 from service import app
 from service.common import status
 from service.models import db, init_db, Recommendation
@@ -103,55 +103,36 @@ class TestRecommendationServer(TestCase):
         data = response.get_json()
         self.assertEqual(data["id"], test_recommendation.id)
 
-    # def test_get_pet_list(self):
-    #     """It should Get a list of Pets"""
-    #     self._create_pets(5)
-    #     response = self.client.get(BASE_URL)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     data = response.get_json()
-    #     self.assertEqual(len(data), 5)
+    def test_get_recommendation_not_found(self):
+        """It should not Get a Recommendation that's not found"""
+        response = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("was not found", data["message"])
 
-    # def test_get_pet_not_found(self):
-    #     """It should not Get a Pet thats not found"""
-    #     response = self.client.get(f"{BASE_URL}/0")
-    #     self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    #     data = response.get_json()
-    #     logging.debug("Response data = %s", data)
-    #     self.assertIn("was not found", data["message"])
+    def test_create_recommendations(self):
+        """Recommendation should be created via POST"""
+        test_recommendation = RecommendationFactory()
+        initial_data = test_recommendation.serialize()
 
-    # def test_create_pet(self):
-    #     """It should Create a new Pet"""
-    #     test_pet = PetFactory()
-    #     logging.debug("Test Pet: %s", test_pet.serialize())
-    #     response = self.client.post(BASE_URL, json=test_pet.serialize())
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # POST the serialized recommendation data
+        response = self.client.post(BASE_URL, json=initial_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    #     # Make sure location header is set
-    #     location = response.headers.get("Location", None)
-    #     self.assertIsNotNone(location)
+        # Check the returned data matches the posted data
+        returned_data = response.get_json()
+        self.assertEqual(returned_data["target_item_id"], initial_data["target_item_id"])
+        self.assertEqual(returned_data["source_item_id"], initial_data["source_item_id"])
+        self.assertEqual(returned_data["recommendation_type"], initial_data["recommendation_type"])
+        self.assertEqual(returned_data["recommendation_weight"], initial_data["recommendation_weight"])
 
-    #     # Check the data is correct
-    #     new_pet = response.get_json()
-    #     self.assertEqual(new_pet["name"], test_pet.name)
-    #     self.assertEqual(new_pet["category"], test_pet.category)
-    #     self.assertEqual(new_pet["available"], test_pet.available)
-    #     self.assertEqual(new_pet["gender"], test_pet.gender.name)
+        # Make sure the returned data has an ID assigned
+        self.assertIsNotNone(returned_data["id"])
 
-    #     # Check that the location header was correct
-    #     response = self.client.get(location)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     new_pet = response.get_json()
-    #     self.assertEqual(new_pet["name"], test_pet.name)
-    #     self.assertEqual(new_pet["category"], test_pet.category)
-    #     self.assertEqual(new_pet["available"], test_pet.available)
-    #     self.assertEqual(new_pet["gender"], test_pet.gender.name)
-
-    # def test_create_recommendations(self):
-    #     """Recommendation should be created via POST"""
-    #     response = self.client.post(BASE_URL, json={})
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     data = response.get_json()
-    #     self.assertEqual(data["status"], 200)
+        # Ensure the recommendation is actually in the database
+        response = self.client.get(f"{BASE_URL}/{returned_data['id']}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_recommendation(self):
         """Recommendation should be updated via PUT"""
@@ -221,44 +202,28 @@ class TestRecommendationServer(TestCase):
         response = self.client.post(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # def test_create_pet_wrong_content_type(self):
-    #     """It should not Create a Pet with the wrong content type"""
-    #     response = self.client.post(BASE_URL, data="hello", content_type="text/html")
-    #     self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    def test_create_recommendation_wrong_content_type(self):
+        """It should not Create a Recommendation with the wrong content type"""
+        response = self.client.post(BASE_URL, data="wrong content", content_type="text/html")
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # def test_create_pet_bad_available(self):
-    #     """It should not Create a Pet with bad available data"""
-    #     test_pet = PetFactory()
-    #     logging.debug(test_pet)
-    #     # change available to a string
-    #     test_pet.available = "true"
-    #     response = self.client.post(BASE_URL, json=test_pet.serialize())
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    def test_create_recommendation_bad_rating(self):
+        """It should not Create a Recommendation with bad weight data"""
+        test_recommendation = RecommendationFactory()
+        logging.debug(test_recommendation)
+        # change weight to a string
+        test_recommendation.recommendation_weight = "0.7"
+        response = self.client.post(BASE_URL, json=test_recommendation.serialize())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    # def test_create_pet_bad_gender(self):
-    #     """It should not Create a Pet with bad gender data"""
-    #     pet = PetFactory()
-    #     logging.debug(pet)
-    #     # change gender to a bad string
-    #     test_pet = pet.serialize()
-    #     test_pet["gender"] = "male"  # wrong case
-    #     response = self.client.post(BASE_URL, json=test_pet)
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    #     def test_get_
-    # @app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
-    # def method_not_supported(error):
-    #     """Handles unsupported HTTP methods with 405_METHOD_NOT_SUPPORTED"""
-    #     message = str(error)
-    #     app.logger.warning(message)
-    #     return (
-    #         jsonify(
-    #             status=status.HTTP_405_METHOD_NOT_ALLOWED,
-    #             error="Method not Allowed",
-    #             message=message,
-    #         ),
-    #         status.HTTP_405_METHOD_NOT_ALLOWED,
-    #     )
+    def test_create_recommendation_bad_type(self):
+        """It should not Create a Recommendation with bad recommendation type data"""
+        recommendation = RecommendationFactory()
+        # change recommendation type to a bad value
+        test_recommendation = recommendation.serialize()
+        test_recommendation["recommendation_type"] = "INVALID_TYPE"  # This value is not in the RecommendationType enumeration
+        response = self.client.post(BASE_URL, json=test_recommendation)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_to_recommendations(self):
         """It should return 405 when sending DELETE to /recommendations"""
