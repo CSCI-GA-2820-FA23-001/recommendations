@@ -240,7 +240,8 @@ class Recommendation(db.Model):
     # ) -> list:
     #     """Returns all Recommendations by their Type
 
-    #     :param recommendation_type: values are ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
+    #     :param recommendation_type: values are
+    #       ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
     #     :type available: enum
 
     #     :return: a collection of Recommendations that are available
