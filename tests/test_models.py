@@ -94,6 +94,19 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.recommendation_weight, 0.7)
         self.assertEqual(recommendation.status, RecommendationStatus.DEPRECATED)
 
+    # def test_add_a_pet(self):
+    #     """It should Create a pet and add it to the database"""
+    #     pets = Pet.all()
+    #     self.assertEqual(pets, [])
+    #     pet = Pet(name="Fido", category="dog", available=True, gender=Gender.MALE)
+    #     self.assertTrue(pet is not None)
+    #     self.assertEqual(pet.id, None)
+    #     pet.create()
+    #     # Assert that it was assigned an id and shows up in the database
+    #     self.assertIsNotNone(pet.id)
+    #     pets = Pet.all()
+    #     self.assertEqual(len(pets), 1)
+
     def test_read_a_recommendation_by_id(self):
         """It should Read a Recommendation by id"""
         recommendation = RecommendationFactory()
@@ -191,6 +204,142 @@ class TestRecommendation(unittest.TestCase):
         # delete the recommendation and make sure it isn't in the database
         recommendation.delete()
         self.assertEqual(len(Recommendation.all()), 0)
+
+    def test_serialize_a_recommendation(self):
+        """It should serialize a Recommendation"""
+        recommendation = RecommendationFactory()
+        data = recommendation.serialize()
+        self.assertNotEqual(data, None)
+        self.assertIn("id", data)
+        self.assertEqual(data["id"], recommendation.id)
+        self.assertIn("source_item_id", data)
+        self.assertEqual(data["source_item_id"], recommendation.source_item_id)
+        self.assertIn("target_item_id", data)
+        self.assertEqual(data["target_item_id"], recommendation.target_item_id)
+        self.assertIn("recommendation_type", data)
+        self.assertEqual(
+            data["recommendation_type"], recommendation.recommendation_type.name
+        )
+        self.assertIn("recommendation_weight", data)
+        self.assertEqual(
+            data["recommendation_weight"], recommendation.recommendation_weight
+        )
+        self.assertIn("status", data)
+        self.assertEqual(data["status"], recommendation.status.name)
+        self.assertIn("created_at", data)
+        self.assertEqual(
+            datetime.fromisoformat(data["created_at"]), recommendation.created_at
+        )
+        self.assertIn("updated_at", data)
+        self.assertEqual(
+            datetime.fromisoformat(data["updated_at"]), recommendation.updated_at
+        )
+
+    def test_deserialize_a_recommendation(self):
+        """It should de-serialize a Recommendation"""
+        data = RecommendationFactory().serialize()
+        recommendation = Recommendation()
+        recommendation.deserialize(data)
+        self.assertNotEqual(recommendation, None)
+        self.assertEqual(recommendation.id, None)
+        self.assertEqual(data["source_item_id"], recommendation.source_item_id)
+        self.assertEqual(data["target_item_id"], recommendation.target_item_id)
+        self.assertEqual(
+            data["recommendation_type"], recommendation.recommendation_type.name
+        )
+        self.assertEqual(
+            data["recommendation_weight"], recommendation.recommendation_weight
+        )
+        self.assertEqual(data["status"], recommendation.status.name)
+        self.assertEqual(
+            datetime.fromisoformat(data["created_at"]), recommendation.created_at
+        )
+        self.assertEqual(
+            datetime.fromisoformat(data["updated_at"]), recommendation.updated_at
+        )
+
+    def test_deserialize_missing_data(self):
+        """It should not deserialize a Recommendation with missing data"""
+        data = {"id": 1, "source_item_id": 8}
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_data(self):
+        """It should not deserialize bad data"""
+        data = "this is not a dictionary"
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_source_item_id(self):
+        """It should not deserialize a bad source_item_id"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["source_item_id"] = -88
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_target_item_id(self):
+        """It should not deserialize a bad target_item_id"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["target_item_id"] = "785"
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_recommendation_weight(self):
+        """It should not deserialize a bad recommendation_weight"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["recommendation_weight"] = 1.8
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_status(self):
+        """It should not deserialize a bad status"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["status"] = "male"  # wrong case
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+        # with self.assertRaises(DataValidationError) as context:
+        #     recommendation.deserialize(data)
+        # print(f"Caught exception: {context.exception}")
+
+    def test_find_or_404_found(self):
+        """It should Find or return 404 not found"""
+        recommendations = RecommendationFactory.create_batch(3)
+        for recommendation in recommendations:
+            recommendation.create()
+
+        recommendation = Recommendation.find_or_404(recommendations[1].id)
+        self.assertIsNot(recommendation, None)
+        self.assertEqual(recommendation.id, recommendations[1].id)
+        self.assertEqual(
+            recommendations[1].source_item_id, recommendation.source_item_id
+        )
+        self.assertEqual(
+            recommendations[1].target_item_id, recommendation.target_item_id
+        )
+        self.assertEqual(
+            recommendations[1].recommendation_type, recommendation.recommendation_type
+        )
+        self.assertEqual(
+            recommendations[1].recommendation_weight,
+            recommendation.recommendation_weight,
+        )
+        self.assertEqual(recommendations[1].status, recommendation.status)
+        self.assertEqual(
+            recommendations[1].created_at,
+            recommendation.created_at,
+        )
+        self.assertEqual(
+            recommendations[1].updated_at,
+            recommendation.updated_at,
+        )
+
+    def test_find_or_404_not_found(self):
+        """It should return 404 not found"""
+        self.assertRaises(NotFound, Recommendation.find_or_404, 0)
 
     def test_list_all_recommendations(self):
         """It should List all Recommendations in the database"""

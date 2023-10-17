@@ -1,8 +1,6 @@
 """
 Recommendation Service
 
-Each person needs to modify the routes they have created. Here is the template provided by the professor.
-
 Paths:
 ------
 GET /recommendations - Returns a list all of the Recommendations
@@ -155,7 +153,7 @@ def update_recommendation():
 
 
 ######################################################################
-# DELETE A Recommendation
+# DELETE A RECOMMENDATION
 ######################################################################
 @app.route("/recommendations/<int:id>", methods=["DELETE"])
 def delete_recommendations(id):
