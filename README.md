@@ -7,29 +7,64 @@ Database, API and scripts for product recommendation
 
 ## Overview
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
+This project facilitates the recommendation function of an online shopping website.
 
-## Automatic Setup
+Goals to implement:
 
-The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
-
-## Manual Setup
-
-You can also clone this repository and then copy and paste the starter code into your project repo folder on your local computer. Be careful not to copy over your own `README.md` file so be selective in what you copy.
-
-There are 4 hidden files that you will need to copy manually if you use the Mac Finder or Windows Explorer to copy files from this folder into your repo folder.
-
-These should be copied using a bash shell as follows:
-
-```bash
-    cp .gitignore  ../<your_repo_folder>/
-    cp .flaskenv ../<your_repo_folder>/
-    cp .gitattributes ../<your_repo_folder>/
-```
+* Get a list recommended products related a requested product by customers.
+* Get recommendations based on user preference
+* Regularly update recommendation, based on product validity, sponsorship from seller, price changes, etc.
+* Create / Delete recommendation
 
 ## Contents
 
-The project contains the following:
+### Tables
+
+#### Recommendation
+
+| Key | Type | Description |
+| -------- | -------- | -------- |
+| id | Key | Primary |
+| source_item_id | Key | Foreign from Items |
+| target_item_id | Key | Foreign from Items |
+| recommendation_type | ENUM("up-sell", "cross-sell", "accessory") | type of recommendation |
+| recommendation_weight | DECIMAL(0, 1) | priority of the rec to be shown |
+| status | ENUM ("valid", "out of stock", "deprecated") | whether the rec is valid |
+| created_at | TIMESTAMP | Create time |
+| updated_at | TIMESTAMP | Update time |
+
+#### Items
+
+| Key | Type | Description |
+| -------- | -------- | -------- |
+| id | Key | Primary |
+| category_id | Key | Foreign from Categories |
+| name | VARCHAR | Name of the item |
+| price | FLOAT | Price of the item |
+| in_stock | BOOLEAN | Whether in stock |
+| created_at | TIMESTAMP | Create time |
+| updated_at | TIMESTAMP | Update time |
+
+#### Categories
+
+| Key | Type | Description |
+| -------- | -------- | -------- |
+| id | Key | Primary |
+| name | VARCHAR | Name of the category |
+
+### API List
+
+| URL | HTTP Method | Description
+| -------- | -------- | -------- |
+| [/](####GET-/) | GET | API version information |
+| [/recommendations/](####GET-/recommendations/) | GET | List recommendation by id |
+| [/recommendations/\<int:id\>](####GET-/recommendations/) | GET | Read recommendation by id |
+| [/recommendations/source_product_\<int:source_item_id\>](####GET-/recommendations/source_product_{id}) | GET | Read recommendation by source_product_id |
+| [/recommendations/](####POST-/recommendations/) | POST | Create recommendation |
+| [/recommendations/](####PUT-/recommendations/) | PUT | Update recommendation |
+| [/recommendations/\<int:id\>](####DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
+
+### File Structure
 
 ```text
 .gitignore          - this will ignore vagrant and other metadata files
@@ -54,6 +89,120 @@ tests/              - test cases package
 ├── test_models.py  - test suite for business models
 └── test_routes.py  - test suite for service routes
 ```
+
+### API Documentation
+
+#### GET /
+
+API information
+
+#### GET /recommendations/
+
+List all recommendations
+
+Status Code | Note
+--- | ---
+200 | OK
+
+#### GET /recommendations/{id}
+
+Read recommendation by id
+
+Status Code | Note
+--- | ---
+200 | OK
+404 | Not found
+
+#### GET /recommendations/source_product_{id}
+
+Read recommendation by source_product_id
+
+Status Code | Note
+--- | ---
+200 | OK
+404 | Not found
+
+#### POST /recommendations/
+
+Create a new recommendation:
+
+```http
+Content-Type: application/json
+{
+  "source_item_id" : 123,
+  "target_item_id" : 456,
+  "recommendation_type" : "UNKNOWN",
+  "recommendation_weight" : 0.8,
+  "status" : "UNKNOWN"
+}
+```
+
+Response:
+
+```http
+{
+  "created_at": "2023-10-17T02:59:59.536538",
+  "id": 625,
+  "recommendation_type": "UNKNOWN",
+  "recommendation_weight": 0.8,
+  "source_item_id": 123,
+  "status": "UNKNOWN",
+  "target_item_id": 456,
+  "updated_at": "2023-10-17T02:59:59.536542"
+}
+```
+
+Status Code | Note
+--- | ---
+201 | Created
+415 | content_type must be application/json
+
+#### PUT /recommendations/
+
+Update a new recommendation
+
+```http
+Content-Type: application/json
+{
+    "id" : 625,
+    "data" : {
+        "source_item_id": 88888
+        "recommendation_weight" : 0.9,
+        "status" : "VALID"
+    }
+}
+```
+
+Response:
+
+```http
+{
+  "created_at": "2023-10-17T02:59:59.536538",
+  "id": 625,
+  "recommendation_type": "UNKNOWN",
+  "recommendation_weight": 0.9,
+  "source_item_id": 88888,
+  "status": "VALID",
+  "target_item_id": 456,
+  "updated_at": "2023-10-17T03:00:32.831226"
+}
+```
+
+Status Code | Note
+--- | ---
+200 | OK
+400 | Malformed payload
+415 | content_type must be application/json
+404 | Not found
+
+#### DELETE /recommendations/{id}
+
+Delete recommendation by id
+
+Status Code | Note
+--- | ---
+204 | Success
+404 | Not found
 
 ## License
 
