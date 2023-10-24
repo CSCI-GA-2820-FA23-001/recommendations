@@ -122,10 +122,19 @@ class TestRecommendationServer(TestCase):
 
         # Check the returned data matches the posted data
         returned_data = response.get_json()
-        self.assertEqual(returned_data["target_item_id"], initial_data["target_item_id"])
-        self.assertEqual(returned_data["source_item_id"], initial_data["source_item_id"])
-        self.assertEqual(returned_data["recommendation_type"], initial_data["recommendation_type"])
-        self.assertEqual(returned_data["recommendation_weight"], initial_data["recommendation_weight"])
+        self.assertEqual(
+            returned_data["target_item_id"], initial_data["target_item_id"]
+        )
+        self.assertEqual(
+            returned_data["source_item_id"], initial_data["source_item_id"]
+        )
+        self.assertEqual(
+            returned_data["recommendation_type"], initial_data["recommendation_type"]
+        )
+        self.assertEqual(
+            returned_data["recommendation_weight"],
+            initial_data["recommendation_weight"],
+        )
 
         # Make sure the returned data has an ID assigned
         self.assertIsNotNone(returned_data["id"])
@@ -139,13 +148,12 @@ class TestRecommendationServer(TestCase):
         recommendations = self._create_recommendations(5)
         test_id = recommendations[2].id
         test_weight = recommendations[2].recommendation_weight
-        changed_weight = max(test_weight + 0.01, 1)
+        changed_weight = 0.0114
         response = self.client.put(
             f"{BASE_URL}/{test_id}",
             json={"recommendation_weight": changed_weight},
         )
         data = response.get_json()
-        self.assertTrue(hasattr(data, "recommendation_weight"))
         self.assertNotEqual(data["recommendation_weight"], test_weight)
         self.assertEqual(data["recommendation_weight"], changed_weight)
         self.assertEqual(data["id"], test_id)
@@ -204,7 +212,9 @@ class TestRecommendationServer(TestCase):
 
     def test_create_recommendation_wrong_content_type(self):
         """It should not Create a Recommendation with the wrong content type"""
-        response = self.client.post(BASE_URL, data="wrong content", content_type="text/html")
+        response = self.client.post(
+            BASE_URL, data="wrong content", content_type="text/html"
+        )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_create_recommendation_bad_rating(self):
@@ -221,7 +231,9 @@ class TestRecommendationServer(TestCase):
         recommendation = RecommendationFactory()
         # change recommendation type to a bad value
         test_recommendation = recommendation.serialize()
-        test_recommendation["recommendation_type"] = "INVALID_TYPE"  # This value is not in the RecommendationType enumeration
+        test_recommendation[
+            "recommendation_type"
+        ] = "INVALID_TYPE"  # This value is not in the RecommendationType enumeration
         response = self.client.post(BASE_URL, json=test_recommendation)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
