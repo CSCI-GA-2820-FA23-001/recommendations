@@ -107,13 +107,10 @@ class Recommendation(db.Model):
         logger.info("Updating %s", self.id)
         try:
             logger.info("Attempting to update Recommendation with ID %s", self.id)
+            data = self.serialize()
             for key, value in payload.items():
-                if hasattr(self, key):
-                    setattr(self, key, value)
-                else:
-                    raise DataValidationError(
-                        f"Malformed payload with invalid field {key}"
-                    )
+                data[key] = value
+            self.deserialize(data)
             db.session.commit()
             logger.info("Successfully updated Recommendation with ID %s", self.id)
         except Exception as e:

@@ -140,12 +140,12 @@ class TestRecommendationServer(TestCase):
         test_id = recommendations[2].id
         test_weight = recommendations[2].recommendation_weight
         changed_weight = max(test_weight + 0.01, 1)
-
         response = self.client.put(
-            BASE_URL,
-            json={"id": test_id, "data": {"recommendation_weight": changed_weight}},
+            f"{BASE_URL}/{test_id}",
+            json={"recommendation_weight": changed_weight},
         )
         data = response.get_json()
+        self.assertTrue(hasattr(data, "recommendation_weight"))
         self.assertNotEqual(data["recommendation_weight"], test_weight)
         self.assertEqual(data["recommendation_weight"], changed_weight)
         self.assertEqual(data["id"], test_id)
