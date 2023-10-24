@@ -160,7 +160,7 @@ class TestRecommendationServer(TestCase):
         test_weight = recommendations[2].recommendation_weight
         changed_weight = max(test_weight + 0.01, 1)
         response = self.client.put(
-            f"{BASE_URL}\\{test_id}",
+            f"{BASE_URL}/{test_id}",
             json={"recommendation_weight": changed_weight},
         )
         data = response.get_json()
