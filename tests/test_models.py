@@ -171,6 +171,7 @@ class TestRecommendation(unittest.TestCase):
             recommendation_weight=0.8,
             status=RecommendationStatus.VALID,
         )
+        recommendation.create()
         recommendation.update({"source_item_id": 789, "recommendation_weight": 0.2})
         self.assertEqual(recommendation.source_item_id, 789)
         self.assertEqual(recommendation.recommendation_weight, 0.2)
