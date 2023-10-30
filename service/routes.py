@@ -59,19 +59,19 @@ def list_recommendations():
 ######################################################################
 # RETRIEVE A RECOMMENDATION
 ######################################################################
-@app.route("/recommendations/<int:id>", methods=["GET"])
-def get_recommendations(id):
+@app.route("/recommendations/<int:recommendation_id>", methods=["GET"])
+def get_recommendations(recommendation_id):
     """
     Retrieve a single Recommendation
 
     This endpoint will return a Recommendation based on it's id
     """
-    app.logger.info("Request for recommendation with id: %s", id)
-    recommendation = Recommendation.find(id)
+    app.logger.info("Request for recommendation with id: %s", recommendation_id)
+    recommendation = Recommendation.find(recommendation_id)
     if not recommendation:
         abort(
             status.HTTP_404_NOT_FOUND,
-            f"Recommendation with id '{id}' was not found.",
+            f"Recommendation with id '{recommendation_id}' was not found.",
         )
 
     app.logger.info("Returning recommendation: %s", recommendation.id)
@@ -110,7 +110,7 @@ def create_recommendations():
     message = recommendation.serialize()
     location_url = url_for(
         "get_recommendations",
-        id=recommendation.id,
+        recommendation_id=recommendation.id,
         _external=True,
     )
     app.logger.info("Recommendation with ID [%s] created.", recommendation.id)
@@ -155,19 +155,19 @@ def update_recommendation():
 ######################################################################
 # DELETE A RECOMMENDATION
 ######################################################################
-@app.route("/recommendations/<int:id>", methods=["DELETE"])
-def delete_recommendations(id):
+@app.route("/recommendations/<int:recommendation_id>", methods=["DELETE"])
+def delete_recommendations(recommendation_id):
     """
     Delete a Recommendation
 
     This endpoint will delete a Recommendation based the id specified in the path
     """
-    app.logger.info("Request to delete recommendation with id: %s", id)
-    recommendation = Recommendation.find(id)
+    app.logger.info("Request to delete recommendation with id: %s", recommendation_id)
+    recommendation = Recommendation.find(recommendation_id)
     if recommendation:
         recommendation.delete()
 
-    app.logger.info("Recommendation with ID [%s] delete complete.", id)
+    app.logger.info("Recommendation with ID [%s] delete complete.", recommendation_id)
     return "", status.HTTP_204_NO_CONTENT
 
 
