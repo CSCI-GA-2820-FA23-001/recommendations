@@ -44,6 +44,7 @@ class RecommendationStatus(Enum):
     DEPRECATED = 3
 
 
+# pylint: disable=too-many-instance-attributes
 class Recommendation(db.Model):
     """
     Class that represents a Recommendation
@@ -92,10 +93,12 @@ class Recommendation(db.Model):
             db.session.add(self)
             db.session.commit()
             logger.info("Successfully created Recommendation with ID %s", self.id)
-        except Exception as e:
-            logger.error("Error creating Recommendation: %s", e)
+        except Exception as error:
+            logger.error("Error creating Recommendation: %s", error)
             db.session.rollback()
-            raise DataValidationError("Error creating Recommendation: " + str(e)) from e
+            raise DataValidationError(
+                "Error creating Recommendation: " + str(error)
+            ) from error
 
     def update(self, payload: dict):
         """
@@ -116,10 +119,12 @@ class Recommendation(db.Model):
                     )
             db.session.commit()
             logger.info("Successfully updated Recommendation with ID %s", self.id)
-        except Exception as e:
-            logger.error("Error updating Recommendation: %s", e)
+        except Exception as error:
+            logger.error("Error updating Recommendation: %s", error)
             db.session.rollback()
-            raise DataValidationError("Error updating Recommendation: " + str(e)) from e
+            raise DataValidationError(
+                "Error updating Recommendation: " + str(error)
+            ) from error
 
     def delete(self):
         """Removes a Recommendation from the data store"""
@@ -140,6 +145,20 @@ class Recommendation(db.Model):
             "updated_at": self.updated_at.isoformat(),
         }
 
+    def _deserialize_int_field(self, data, key):
+        value = data.get(key)
+        if isinstance(value, int) and value >= 0:
+            return value
+        raise DataValidationError(f"Invalid type or value for int [{key}]: {value}")
+
+    def _deserialize_recommendation_weight(self, data):
+        value = data.get("recommendation_weight")
+        if isinstance(value, (int, float)) and 0 <= value <= 1:
+            return value
+        raise DataValidationError(
+            f"Invalid type or value for recommendation weight: {value}"
+        )
+
     def deserialize(self, data):
         """
         Deserializes a Recommendation from a dictionary
@@ -148,30 +167,9 @@ class Recommendation(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            if isinstance(data["source_item_id"], int) and data["source_item_id"] >= 0:
-                self.source_item_id = data["source_item_id"]
-            else:
-                raise DataValidationError(
-                    "Invalid type or invalid value for int [source_item_id]: "
-                    + str(data["source_item_id"])
-                )
-            if isinstance(data["target_item_id"], int) and data["target_item_id"] >= 0:
-                self.target_item_id = data["target_item_id"]
-            else:
-                raise DataValidationError(
-                    "Invalid type or invalid value for int [target_item_id]: "
-                    + str(data["target_item_id"])
-                )
-            if (
-                data["recommendation_weight"] >= 0
-                and data["recommendation_weight"] <= 1
-            ):
-                self.recommendation_weight = data["recommendation_weight"]
-            else:
-                raise DataValidationError(
-                    "Invalid type or invalid value for int [recommendation_weight]: "
-                    + str(data["recommendation_weight"])
-                )
+            self.source_item_id = self._deserialize_int_field(data, "source_item_id")
+            self.target_item_id = self._deserialize_int_field(data, "target_item_id")
+            self.recommendation_weight = self._deserialize_recommendation_weight(data)
             if "recommendation_type" in data:
                 self.recommendation_type = RecommendationType[
                     data["recommendation_type"].upper()
@@ -189,6 +187,11 @@ class Recommendation(db.Model):
         except TypeError as error:
             raise DataValidationError(
                 "Invalid recommendation: body of request contained bad or no data "
+                + str(error)
+            ) from error
+        except AttributeError as error:
+            raise DataValidationError(
+                "Invalid recommendation: expected a dictionary, but got a string or other type "
                 + str(error)
             ) from error
         return self
@@ -214,16 +217,16 @@ class Recommendation(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find(cls, id: int):
+    def find(cls, recommendation_id: int):
         """Finds a Recommendation by it's ID"""
-        logger.info("Processing lookup for id %s ...", id)
-        return cls.query.get(id)
+        logger.info("Processing lookup for id %s ...", recommendation_id)
+        return cls.query.get(recommendation_id)
 
     @classmethod
-    def find_or_404(cls, id: int):
+    def find_or_404(cls, recommendation_id: int):
         """Find a Recommendation by it's id"""
-        logger.info("Processing lookup or 404 for id %s ...", id)
-        return cls.query.get_or_404(id)
+        logger.info("Processing lookup or 404 for id %s ...", recommendation_id)
+        return cls.query.get_or_404(recommendation_id)
 
     @classmethod
     def find_by_source_item_id(cls, source_item_id: int) -> list:
@@ -276,8 +279,6 @@ class Recommendation(db.Model):
     #     )
     #     return cls.query.filter(cls.status == recommendation_status)
 
-
-# TODO
 
 # find_top5_by_source_item_id
 
