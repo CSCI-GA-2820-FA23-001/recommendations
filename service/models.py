@@ -232,10 +232,10 @@ class Recommendation(db.Model):
         return cls.query.filter(cls.source_item_id == source_item_id)
 
     @classmethod
-    def filter_all_by_valid_status(cls):
-        """Returns all of the valid recommendations in the database"""
-        logger.info("Filtering and returning all valid recommendations")
-        return cls.query.filter(cls.status == RecommendationStatus.VALID)
+    def filter_all_by_status(cls, status):
+        """Returns all of recommendations filtered by status in the database"""
+        logger.info("Filtering and returning all recommendations by status")
+        return cls.query.filter(cls.status == status)
 
     # @classmethod
     # def find_by_target_item_id(cls, target_item_id: int) -> list:
