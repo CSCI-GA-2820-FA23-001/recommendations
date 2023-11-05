@@ -231,6 +231,12 @@ class Recommendation(db.Model):
         logger.info("Processing source id query for %s ...", source_item_id)
         return cls.query.filter(cls.source_item_id == source_item_id)
 
+    @classmethod
+    def filter_all_by_valid_status(cls):
+        """Returns all of the valid recommendations in the database"""
+        logger.info("Filtering and returning all valid recommendations")
+        return cls.query.filter(cls.status == RecommendationStatus.VALID)
+
     # @classmethod
     # def find_by_target_item_id(cls, target_item_id: int) -> list:
     #     """Returns all Recommendation with the given target_item_id"""
