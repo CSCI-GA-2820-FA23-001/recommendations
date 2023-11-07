@@ -93,6 +93,21 @@ def read_recommendations_by_source_type(source_item_id):
     return jsonify(results), status.HTTP_200_OK
 
 
+@app.route(
+    "/recommendations/source_product_<int:source_item_id>/valid", methods=["GET"]
+)
+def read_valid_recommendations_by_source_type(source_item_id):
+    """
+    Read a list of valid recommendations based on the source product they select
+    """
+    app.logger.info("Request for recommendations list based on source product")
+    recommendations = []
+    recommendations = Recommendation.find_valid_by_source_item_id(source_item_id)
+    results = [recommendation.serialize() for recommendation in recommendations]
+    app.logger.info("Returning %d recommendations", len(results))
+    return jsonify(results), status.HTTP_200_OK
+
+
 ######################################################################
 # ADD A NEW RECOMMENDATION
 ######################################################################
