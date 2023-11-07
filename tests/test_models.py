@@ -376,7 +376,7 @@ class TestRecommendation(unittest.TestCase):
             self.assertEqual(recommendation.status, status)
 
     def test_find_valid_by_source_item_id(self):
-        """It should find Recommendations by source product id"""
+        """It should find valid recommendations by source product id"""
         recommendations = RecommendationFactory.create_batch(10)
         for recommendation in recommendations:
             recommendation.create()
@@ -390,7 +390,7 @@ class TestRecommendation(unittest.TestCase):
             ]
         )
         found = Recommendation.find_valid_by_source_item_id(source_item_id)
-        self.assertEqual(found.count(), count)
+        self.assertEqual(len(found), count)
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
             self.assertEqual(recommendation.status, RecommendationStatus.VALID)
