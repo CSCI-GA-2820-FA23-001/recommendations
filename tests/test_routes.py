@@ -177,7 +177,9 @@ class TestRecommendationServer(TestCase):
             for recommendation in recommendations
             if recommendation.source_item_id == test_source_item_id
         ]
-        response = self.client.get(f"{BASE_URL}/source_product_{test_source_item_id}")
+        response = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}"
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), len(category_recommendations))
@@ -196,7 +198,7 @@ class TestRecommendationServer(TestCase):
             and recommendation.status == RecommendationStatus.VALID
         ]
         response = self.client.get(
-            f"{BASE_URL}/source_product_{test_source_item_id}/valid"
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&status=valid"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
