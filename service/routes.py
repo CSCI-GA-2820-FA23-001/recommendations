@@ -80,29 +80,21 @@ def get_recommendations(recommendation_id):
     return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 
-@app.route("/recommendations/source_product_<int:source_item_id>", methods=["GET"])
-def read_recommendations_by_source_type(source_item_id):
+@app.route("/recommendations/source-product", methods=["GET"])
+def read_recommendations_by_source_type():
     """
     Read a list of recommendations based on the source product they select
     """
     app.logger.info("Request for recommendations list based on source product")
+    source_item_id = request.args.get("source_item_id", type=int)
+    product_status = request.args.get("status", default=None)
     recommendations = []
-    recommendations = Recommendation.find_by_source_item_id(source_item_id)
-    results = [recommendation.serialize() for recommendation in recommendations]
-    app.logger.info("Returning %d recommendations", len(results))
-    return jsonify(results), status.HTTP_200_OK
-
-
-@app.route(
-    "/recommendations/source_product_<int:source_item_id>/valid", methods=["GET"]
-)
-def read_valid_recommendations_by_source_type(source_item_id):
-    """
-    Read a list of valid recommendations based on the source product they select
-    """
-    app.logger.info("Request for recommendations list based on source product")
-    recommendations = []
-    recommendations = Recommendation.find_valid_by_source_item_id(source_item_id)
+    if source_item_id is None:
+        return jsonify({"error": "Source item ID is required"}), 400
+    if product_status == "valid":
+        recommendations = Recommendation.find_valid_by_source_item_id(source_item_id)
+    else:
+        recommendations = Recommendation.find_by_source_item_id(source_item_id)
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK
