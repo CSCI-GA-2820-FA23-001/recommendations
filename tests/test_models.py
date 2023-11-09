@@ -353,3 +353,44 @@ class TestRecommendation(unittest.TestCase):
         # See if we get back 5 recs
         recs = Recommendation.all()
         self.assertEqual(len(recs), 5)
+
+    def test_filter_all_by_status(self):
+        """It should return all recommendations filtered by given status in the database"""
+        recs = Recommendation.all()
+        self.assertEqual(recs, [])
+        # Create 10 Recommendations
+        recommendations = RecommendationFactory.create_batch(10)
+        for recommendation in recommendations:
+            recommendation.create()
+        status = recommendations[0].status
+        count = len(
+            [
+                recommendation
+                for recommendation in recommendations
+                if recommendation.status == status
+            ]
+        )
+        found = Recommendation.filter_all_by_status(status)
+        self.assertEqual(found.count(), count)
+        for recommendation in found:
+            self.assertEqual(recommendation.status, status)
+
+    def test_find_valid_by_source_item_id(self):
+        """It should find valid recommendations by source product id"""
+        recommendations = RecommendationFactory.create_batch(10)
+        for recommendation in recommendations:
+            recommendation.create()
+        source_item_id = recommendations[0].source_item_id
+        count = len(
+            [
+                recommendation
+                for recommendation in recommendations
+                if recommendation.source_item_id == source_item_id
+                and recommendation.status == RecommendationStatus.VALID
+            ]
+        )
+        found = Recommendation.find_valid_by_source_item_id(source_item_id)
+        self.assertEqual(len(found), count)
+        for recommendation in found:
+            self.assertEqual(recommendation.source_item_id, source_item_id)
+            self.assertEqual(recommendation.status, RecommendationStatus.VALID)

@@ -13,7 +13,7 @@ from unittest import TestCase
 # from urllib.parse import quote_plus
 from service import app
 from service.common import status
-from service.models import db, init_db, Recommendation
+from service.models import db, init_db, Recommendation, RecommendationStatus
 from tests.factories import RecommendationFactory
 
 # Disable all but critical errors during normal test run
@@ -177,13 +177,36 @@ class TestRecommendationServer(TestCase):
             for recommendation in recommendations
             if recommendation.source_item_id == test_source_item_id
         ]
-        response = self.client.get(f"{BASE_URL}/source_product_{test_source_item_id}")
+        response = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}"
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), len(category_recommendations))
         # check the data just to be sure
         for recommendation in data:
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+
+    def test_read_valid_recommendations_by_source_item_id(self):
+        """It should get a list of valid recommendations by its source product id"""
+        recommendations = self._create_recommendations(5)
+        test_source_item_id = recommendations[0].source_item_id
+        category_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.source_item_id == test_source_item_id
+            and recommendation.status == RecommendationStatus.VALID
+        ]
+        response = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&status=valid"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(category_recommendations))
+        # check the data just to be sure
+        for recommendation in data:
+            self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+            self.assertEqual(recommendation["status"], "VALID")
 
     def test_get_recommendation_list(self):
         """It should Get a list of Recommendations"""
@@ -241,6 +264,11 @@ class TestRecommendationServer(TestCase):
         """It should return 405 when sending DELETE to /recommendations"""
         response = self.client.delete(BASE_URL)
         self.assertEqual(response.status_code, 405)
+
+    def test_read_recommendations_by_source_item_id_empty_query(self):
+        """It should return 400 when sending with out source_item)id"""
+        response = self.client.get(f"{BASE_URL}/source-product")
+        self.assertEqual(response.status_code, 400)
 
     ######################################################################
     #  T E S T   A C T I O N S

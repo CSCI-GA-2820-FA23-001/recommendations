@@ -231,6 +231,21 @@ class Recommendation(db.Model):
         logger.info("Processing source id query for %s ...", source_item_id)
         return cls.query.filter(cls.source_item_id == source_item_id)
 
+    @classmethod
+    def filter_all_by_status(cls, status):
+        """Returns all of recommendations filtered by status in the database"""
+        logger.info("Filtering and returning all recommendations by status")
+        return cls.query.filter(cls.status == status)
+
+    @classmethod
+    def find_valid_by_source_item_id(cls, source_item_id: int) -> list:
+        """Returns all valid recommendation with the given source_item_id"""
+        logger.info("Processing source id query for %s ...", source_item_id)
+        return cls.query.filter(
+            cls.source_item_id == source_item_id,
+            cls.status == RecommendationStatus.VALID,
+        ).all()
+
     # @classmethod
     # def find_by_target_item_id(cls, target_item_id: int) -> list:
     #     """Returns all Recommendation with the given target_item_id"""
