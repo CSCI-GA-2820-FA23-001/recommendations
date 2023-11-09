@@ -265,6 +265,11 @@ class TestRecommendationServer(TestCase):
         response = self.client.delete(BASE_URL)
         self.assertEqual(response.status_code, 405)
 
+    def test_read_recommendations_by_source_item_id_empty_query(self):
+        """It should return 400 when sending with out source_item)id"""
+        response = self.client.get(f"{BASE_URL}/source-product")
+        self.assertEqual(response.status_code, 400)
+
     ######################################################################
     #  T E S T   A C T I O N S
     ######################################################################
