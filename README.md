@@ -1,5 +1,4 @@
 
-
 # NYU DevOps: Recommendation
 
 [![Build Status](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions/workflows/workflow.yml/badge.svg)](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions)
@@ -59,13 +58,13 @@ Goals to implement:
 
 | URL | HTTP Method | Description
 | -------- | -------- | -------- |
-| [/](####GET-/) | GET | API version information |
-| [/recommendations/](####GET-/recommendations/) | GET | List recommendation by id |
-| [/recommendations/\<int:id\>](####GET-/recommendations/) | GET | Read recommendation by id |
-| [/recommendations/source_product/\<int:source_item_id\>](####GET-/recommendations/source_product/id={id}) | GET | Read recommendation by source_product_id |
-| [/recommendations/](####POST-/recommendations/) | POST | Create recommendation |
-| [/recommendations/](####PUT-/recommendations/) | PUT | Update recommendation |
-| [/recommendations/\<int:id\>](####DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
+| [/](#GET-/) | GET | API version information |
+| [/recommendations/](#GET-/recommendations/) | GET | List recommendation by id |
+| [/recommendations/\<int:id\>](#GET-/recommendations/) | GET | Read recommendation by id |
+| [/recommendations/source_product/?](#GET-/recommendations/source_product/?) | GET | Read recommendation by source_product_id |
+| [/recommendations/](#POST-/recommendations/) | POST | Create recommendation |
+| [/recommendations/](#PUT-/recommendations/) | PUT | Update recommendation |
+| [/recommendations/\<int:id\>](#DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
 
 ### File Structure
 
@@ -128,12 +127,12 @@ Status Code | Note
 200 | OK
 404 | Not found
 
-#### GET /recommendations/source_product_{id}
+#### GET /recommendations/source_product/?
 
-Read recommendation by source_product_id
+Read recommendation by source_product
 
 ```http
-GET /recommendations/source_product_123
+GET /recommendations/source_product/?source_item_id=123
 ```
 
 Response:
@@ -200,9 +199,9 @@ Update a new recommendation
 PUT /recommendations/625
 Content-Type: application/json
 {
-    "source_item_id": 88888
-    "recommendation_weight" : 0.9,
-    "status" : "VALID"
+  "source_item_id": 88888
+  "recommendation_weight" : 0.9,
+  "status" : "VALID"
 }
 ```
 
