@@ -36,7 +36,7 @@ Goals to implement:
 | created_at | TIMESTAMP | Create time |
 | updated_at | TIMESTAMP | Update time |
 
-<!-- #### Items
+#### Items
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
@@ -46,14 +46,14 @@ Goals to implement:
 | price | FLOAT | Price of the item |
 | in_stock | BOOLEAN | Whether in stock |
 | created_at | TIMESTAMP | Create time |
-| updated_at | TIMESTAMP | Update time | -->
+| updated_at | TIMESTAMP | Update time |
 
-<!-- #### Categories
+#### Categories
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
 | id | Key | Primary |
-| name | VARCHAR | Name of the category | -->
+| name | VARCHAR | Name of the category |
 
 ### API List
 
@@ -62,7 +62,7 @@ Goals to implement:
 | [/](####GET-/) | GET | API version information |
 | [/recommendations/](####GET-/recommendations/) | GET | List recommendation by id |
 | [/recommendations/\<int:id\>](####GET-/recommendations/) | GET | Read recommendation by id |
-| [/recommendations/source_product_\<int:source_item_id\>](####GET-/recommendations/source_product_{id}) | GET | Read recommendation by source_product_id |
+| [/recommendations/source_product/\<int:source_item_id\>](####GET-/recommendations/source_product/id={id}) | GET | Read recommendation by source_product_id |
 | [/recommendations/](####POST-/recommendations/) | POST | Create recommendation |
 | [/recommendations/](####PUT-/recommendations/) | PUT | Update recommendation |
 | [/recommendations/\<int:id\>](####DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
@@ -99,9 +99,17 @@ tests/              - test cases package
 
 API information
 
-#### GET /recommendations/
+```http
+GET /
+```
+
+#### GET /recommendations
 
 List all recommendations
+
+```http
+GET /recommendations
+```
 
 Status Code | Note
 --- | ---
@@ -111,6 +119,10 @@ Status Code | Note
 
 Read recommendation by id
 
+```http
+GET /recommendations/625
+```
+
 Status Code | Note
 --- | ---
 200 | OK
@@ -119,6 +131,25 @@ Status Code | Note
 #### GET /recommendations/source_product_{id}
 
 Read recommendation by source_product_id
+
+```http
+GET /recommendations/source_product_123
+```
+
+Response:
+
+```http
+[{
+  "created_at": "2023-10-17T02:59:59.536538",
+  "id": 625,
+  "recommendation_type": "UNKNOWN",
+  "recommendation_weight": 0.9,
+  "source_item_id": 123,
+  "status": "VALID",
+  "target_item_id": 456,
+  "updated_at": "2023-10-17T03:00:32.831226"
+}]
+```
 
 Status Code | Note
 --- | ---
@@ -130,6 +161,7 @@ Status Code | Note
 Create a new recommendation:
 
 ```http
+POST /recommendations
 Content-Type: application/json
 {
   "source_item_id" : 123,
@@ -160,19 +192,17 @@ Status Code | Note
 201 | Created
 415 | content_type must be application/json
 
-#### PUT /recommendations/
+#### PUT /recommendations/{id}
 
 Update a new recommendation
 
 ```http
+PUT /recommendations/625
 Content-Type: application/json
 {
-    "id" : 625,
-    "data" : {
-        "source_item_id": 88888
-        "recommendation_weight" : 0.9,
-        "status" : "VALID"
-    }
+    "source_item_id": 88888
+    "recommendation_weight" : 0.9,
+    "status" : "VALID"
 }
 ```
 
