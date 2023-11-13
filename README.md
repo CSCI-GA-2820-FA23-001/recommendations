@@ -1,5 +1,4 @@
 
-
 # NYU DevOps: Recommendation
 
 [![Build Status](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions/workflows/workflow.yml/badge.svg)](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions)
@@ -36,7 +35,7 @@ Goals to implement:
 | created_at | TIMESTAMP | Create time |
 | updated_at | TIMESTAMP | Update time |
 
-<!-- #### Items
+#### Items
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
@@ -46,14 +45,14 @@ Goals to implement:
 | price | FLOAT | Price of the item |
 | in_stock | BOOLEAN | Whether in stock |
 | created_at | TIMESTAMP | Create time |
-| updated_at | TIMESTAMP | Update time | -->
+| updated_at | TIMESTAMP | Update time |
 
-<!-- #### Categories
+#### Categories
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
 | id | Key | Primary |
-| name | VARCHAR | Name of the category | -->
+| name | VARCHAR | Name of the category |
 
 ### API List
 
@@ -66,6 +65,7 @@ Goals to implement:
 | [/recommendations/](#post-/recommendations/) | POST | Create recommendation |
 | [/recommendations/](#put-/recommendations/) | PUT | Update recommendation |
 | [/recommendations/\<int:id\>](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
+
 
 ### File Structure
 
@@ -103,6 +103,10 @@ Retrieve API information
 
 List all recommendations with pagination
 
+```http
+GET /
+```
+
 Status Code | Note
 --- | ---
 200 | OK
@@ -111,14 +115,37 @@ Status Code | Note
 
 Read recommendation by id
 
+```http
+GET /recommendations/625
+```
+
 Status Code | Note
 --- | ---
 200 | OK
 404 | Not found
 
-#### GET /recommendations/source_product_{id}
+#### GET /recommendations/source_product/?
 
-Read recommendation by source_product_id
+Read recommendation by source_product
+
+```http
+GET /recommendations/source_product/?source_item_id=123
+```
+
+Response:
+
+```http
+[{
+  "created_at": "2023-10-17T02:59:59.536538",
+  "id": 625,
+  "recommendation_type": "UNKNOWN",
+  "recommendation_weight": 0.9,
+  "source_item_id": 123,
+  "status": "VALID",
+  "target_item_id": 456,
+  "updated_at": "2023-10-17T03:00:32.831226"
+}]
+```
 
 Status Code | Note
 --- | ---
@@ -130,6 +157,7 @@ Status Code | Note
 Create a new recommendation:
 
 ```http
+POST /recommendations
 Content-Type: application/json
 {
   "source_item_id" : 123,
@@ -160,19 +188,17 @@ Status Code | Note
 201 | Created
 415 | content_type must be application/json
 
-#### PUT /recommendations/
+#### PUT /recommendations/{id}
 
 Update a new recommendation
 
 ```http
+PUT /recommendations/625
 Content-Type: application/json
 {
-    "id" : 625,
-    "data" : {
-        "source_item_id": 88888
-        "recommendation_weight" : 0.9,
-        "status" : "VALID"
-    }
+  "source_item_id": 88888
+  "recommendation_weight" : 0.9,
+  "status" : "VALID"
 }
 ```
 
