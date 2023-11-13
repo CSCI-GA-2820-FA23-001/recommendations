@@ -209,9 +209,13 @@ class TestRecommendationServer(TestCase):
             self.assertEqual(recommendation["status"], "VALID")
 
     def test_get_recommendation_list(self):
-        """It should Get a list of Recommendations"""
-        self._create_recommendations(5)
-        response = self.client.get(BASE_URL)
+        """It should Get a list of Recommendations with pagination"""
+        self._create_recommendations(15)
+        response = self.client.get(f"{BASE_URL}?page-index=1&page-size=5")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        response = self.client.get(f"{BASE_URL}?page-index=2&page-size=10")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 5)

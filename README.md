@@ -60,9 +60,9 @@ Goals to implement:
 | URL | HTTP Method | Description
 | -------- | -------- | -------- |
 | [/](#get-/) | GET | API version information |
-| [/recommendations/](#get-/recommendations/) | GET | List recommendation by id |
-| [/recommendations/\<int:id\>](#get-/recommendations/) | GET | Read recommendation by id |
-| [/recommendations/source_product/?](#get-/recommendations/source_product/?) | GET | Read recommendation by source_product_id |
+| [/recommendations?](#get-/recommendations) | GET | List recommendation by page |
+| [/recommendations/\<int:id\>](#get-/recommendations) | GET | Read recommendation by id |
+| [/recommendations/source_product?](#get-/recommendations/source_product?) | GET | Read recommendation by source_product_id |
 | [/recommendations/](#post-/recommendations/) | POST | Create recommendation |
 | [/recommendations/](#put-/recommendations/) | PUT | Update recommendation |
 | [/recommendations/\<int:id\>](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
@@ -99,9 +99,9 @@ tests/              - test cases package
 
 Retrieve API information
 
-#### GET /recommendations/
+#### GET /recommendations?page-index=1&page-size=10
 
-List all recommendations
+List all recommendations with pagination
 
 Status Code | Note
 --- | ---

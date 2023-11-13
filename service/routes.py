@@ -50,7 +50,7 @@ def index():
 def list_recommendations():
     """Returns all of the Recommendations"""
     page_index = request.args.get("page-index", type=int)
-    page_size = request.args.get("per-page", type=int)
+    page_size = request.args.get("page-size", type=int)
 
     app.logger.info("Request for recommendation list")
     # recommendations = Recommendation.all()
