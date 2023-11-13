@@ -12,7 +12,7 @@ DELETE /recommendations/{id} - deletes a Recommendation record in the database
 """
 
 from flask import jsonify, request, url_for, abort
-from service.models import Recommendation
+from service.models import Recommendation, RecommendationType
 from service.common import status  # HTTP Status Codes
 from . import app  # Import Flask application
 
@@ -50,7 +50,24 @@ def index():
 def list_recommendations():
     """Returns all of the Recommendations"""
     app.logger.info("Request for recommendation list")
-    recommendations = Recommendation.all()
+
+    recommendations = []
+    type = request.args.get("type")
+
+    if type:
+        app.logger.info("Find by recommendation type: %s", type)
+        try:
+            type_value = getattr(RecommendationType, type.upper())
+        except AttributeError:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Invalid recommendation type: '{type}'.",
+            )
+        recommendations = Recommendation.find_by_recommendation_type(type_value)
+    else:
+        app.logger.info("Find all")
+        recommendations = Recommendation.all()
+
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK
