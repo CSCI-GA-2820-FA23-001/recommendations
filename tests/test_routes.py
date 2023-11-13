@@ -214,16 +214,16 @@ class TestRecommendationServer(TestCase):
 
     def test_get_recommendation_list(self):
         """It should Get a list of Recommendations"""
-        n = 3
-        recommendations = self._create_recommendations(n)
+        number = 3
+        recommendations = self._create_recommendations(number)
         ids = []
-        for i in range(n):
+        for i in range(number):
             ids.append(recommendations[i].id)
         response = self.client.get(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        self.assertEqual(len(data), n)
-        for i in range(n):
+        self.assertEqual(len(data), number)
+        for i in range(number):
             self.assertEqual(data[i]["id"], ids[i])
 
     def test_like_recommendation(self):
