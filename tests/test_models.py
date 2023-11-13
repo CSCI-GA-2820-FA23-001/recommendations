@@ -73,6 +73,7 @@ class TestRecommendation(unittest.TestCase):
             recommendation_type=RecommendationType.UP_SELL,
             recommendation_weight=0.8,
             status=RecommendationStatus.VALID,
+            number_of_likes=0,
         )
         self.assertTrue(recommendation is not None)
         self.assertEqual(recommendation.id, None)
@@ -81,12 +82,14 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.recommendation_type, RecommendationType.UP_SELL)
         self.assertEqual(recommendation.recommendation_weight, 0.8)
         self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+        self.assertEqual(recommendation.number_of_likes, 0)
         recommendation = Recommendation(
             source_item_id=123,
             target_item_id=456,
             recommendation_type=RecommendationType.CROSS_SELL,
             recommendation_weight=0.7,
             status=RecommendationStatus.DEPRECATED,
+            number_of_likes=0,
         )
         self.assertEqual(
             recommendation.recommendation_type, RecommendationType.CROSS_SELL
@@ -353,6 +356,22 @@ class TestRecommendation(unittest.TestCase):
         # See if we get back 5 recs
         recs = Recommendation.all()
         self.assertEqual(len(recs), 5)
+
+    def test_like_a_recommendation(self):
+        """It should like the given recommendation"""
+        rec = RecommendationFactory()
+        rec.create()
+        self.assertEqual(rec.number_of_likes, 0)
+        rec.like()
+        self.assertEqual(rec.number_of_likes, 1)
+
+    def test_like_a_recommendation_raise_error(self):
+        """Like recommendation with invalid datatype should raise error"""
+        rec = RecommendationFactory()
+        rec.create()
+        self.assertEqual(rec.number_of_likes, 0)
+        rec.number_of_likes = "string"
+        self.assertRaises(DataValidationError, rec.like)
 
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
