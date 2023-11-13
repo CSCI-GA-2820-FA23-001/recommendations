@@ -52,16 +52,16 @@ def list_recommendations():
     app.logger.info("Request for recommendation list")
 
     recommendations = []
-    type = request.args.get("type")
+    recommendation_type = request.args.get("type")
 
-    if type:
-        app.logger.info("Find by recommendation type: %s", type)
+    if recommendation_type:
+        app.logger.info("Find by recommendation type: %s", recommendation_type)
         try:
-            type_value = getattr(RecommendationType, type.upper())
+            type_value = getattr(RecommendationType, recommendation_type.upper())
         except AttributeError:
             abort(
                 status.HTTP_400_BAD_REQUEST,
-                f"Invalid recommendation type: '{type}'.",
+                f"Invalid recommendation type: '{recommendation_type}'.",
             )
         recommendations = Recommendation.find_by_recommendation_type(type_value)
     else:

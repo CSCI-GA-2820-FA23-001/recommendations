@@ -13,13 +13,7 @@ from unittest import TestCase
 # from urllib.parse import quote_plus
 from service import app
 from service.common import status
-from service.models import (
-    db,
-    init_db,
-    Recommendation,
-    RecommendationStatus,
-    RecommendationType,
-)
+from service.models import db, init_db, Recommendation, RecommendationStatus
 from tests.factories import RecommendationFactory
 
 # Disable all but critical errors during normal test run
