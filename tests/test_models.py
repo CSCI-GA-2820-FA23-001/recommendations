@@ -138,7 +138,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_recommendation.status, recommendation.status)
 
     def test_find_by_source_item_id(self):
-        """It should find Recommendations by source product id"""
+        """It should find recommendations by source product id"""
         recommendations = RecommendationFactory.create_batch(10)
         for recommendation in recommendations:
             recommendation.create()
@@ -413,3 +413,33 @@ class TestRecommendation(unittest.TestCase):
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
             self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+
+    def test_find_all_by_type(self):
+        """It should return all recommendations filtered by given type in the database"""
+        # Create 10 Recommendations
+        recommendations = RecommendationFactory.create_batch(10)
+        for recommendation in recommendations:
+            recommendation.create()
+        recommendation_type = recommendations[0].recommendation_type
+        cnt = len(
+            [
+                recommendation
+                for recommendation in recommendations
+                if recommendation.recommendation_type == recommendation_type
+            ]
+        )
+        found = Recommendation.find_by_recommendation_type(recommendation_type)
+        self.assertEqual(found.count(), cnt)
+        for recommendation in found:
+            self.assertEqual(recommendation.recommendation_type, recommendation_type)
+
+    def test_find_all_by_type_with_invalid_type(self):
+        """It should not allow invalid recommendation types"""
+        invalid_type_1 = "UP_SELL"
+        self.assertRaises(
+            AttributeError, Recommendation.find_by_recommendation_type, invalid_type_1
+        )
+        invalid_type_2 = 1
+        self.assertRaises(
+            AttributeError, Recommendation.find_by_recommendation_type, invalid_type_2
+        )

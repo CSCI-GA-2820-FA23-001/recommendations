@@ -260,6 +260,25 @@ class Recommendation(db.Model):
         return cls.query.filter(cls.status == status)
 
     @classmethod
+    def find_by_recommendation_type(
+        cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
+    ) -> list:
+        """Returns all Recommendations by their Type
+
+        :param recommendation_type: values are
+          ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
+        :type available: enum
+
+        :return: a collection of Recommendations that are available
+        :rtype: list
+
+        """
+        logger.info(
+            "Processing recommendation type query for %s ...", recommendation_type.name
+        )
+        return cls.query.filter(cls.recommendation_type == recommendation_type)
+
+    @classmethod
     def find_valid_by_source_item_id(cls, source_item_id: int) -> list:
         """Returns all valid recommendation with the given source_item_id"""
         logger.info("Processing source id query for %s ...", source_item_id)
@@ -273,25 +292,6 @@ class Recommendation(db.Model):
     #     """Returns all Recommendation with the given target_item_id"""
     #     logger.info("Processing target item id query for %s ...", target_item_id)
     #     return cls.query.filter(cls.target_item_id == target_item_id)
-
-    # @classmethod
-    # def find_by_recommendation_type(
-    #     cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
-    # ) -> list:
-    #     """Returns all Recommendations by their Type
-
-    #     :param recommendation_type: values are
-    #       ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
-    #     :type available: enum
-
-    #     :return: a collection of Recommendations that are available
-    #     :rtype: list
-
-    #     """
-    #     logger.info(
-    #         "Processing recommendation type query for %s ...", recommendation_type.name
-    #     )
-    #     return cls.query.filter(cls.recommendation_type == recommendation_type)
 
     # @classmethod
     # def find_by_recommendation_status(

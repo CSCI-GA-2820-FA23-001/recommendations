@@ -239,6 +239,24 @@ class TestRecommendationServer(TestCase):
         logging.debug("Response data: %s", data)
         self.assertEqual(data["number_of_likes"], 1)
 
+    def test_read_recommendations_by_type(self):
+        """It should get a list recommendations by its recommendation type"""
+        recommendations = self._create_recommendations(10)
+        test_recommendation_type = recommendations[0].recommendation_type
+        same_type_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.recommendation_type == test_recommendation_type
+        ]
+        response = self.client.get(f"{BASE_URL}?type={test_recommendation_type.name}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(same_type_recommendations))
+        for recommendation in data:
+            self.assertEqual(
+                recommendation["recommendation_type"], test_recommendation_type.name
+            )
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
@@ -251,7 +269,7 @@ class TestRecommendationServer(TestCase):
         # message = response_data.get("message", "No message provided")
         # print("Error message:", message)
 
-    def test_create_pet_no_content_type(self):
+    def test_create_recommendation_no_content_type(self):
         """It should not Create a Recommendation with no content type"""
         response = self.client.post(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
@@ -289,8 +307,13 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_read_recommendations_by_source_item_id_empty_query(self):
-        """It should return 400 when sending with out source_item)id"""
+        """It should return 400 when sending without source_item_id"""
         response = self.client.get(f"{BASE_URL}/source-product")
+        self.assertEqual(response.status_code, 400)
+
+    def test_read_recommendations_by_invalid_type(self):
+        """It should return 400 when sending invalid recommendation type"""
+        response = self.client.get(f"{BASE_URL}?type=33")
         self.assertEqual(response.status_code, 400)
 
     def test_like_recommendation_bad_id(self):
