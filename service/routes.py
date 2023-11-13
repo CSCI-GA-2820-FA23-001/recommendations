@@ -169,6 +169,26 @@ def delete_recommendations(recommendation_id):
 
 
 ######################################################################
+# LIKE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>/like", methods=["PUT"])
+def like_recommendation(recommendation_id):
+    """
+    Like a Recommendation
+
+    This endpoint will like a Recommendation based the id specified in the path
+    """
+    app.logger.info("Request to like recommendation with id: %s", recommendation_id)
+    recommendation = Recommendation.find(recommendation_id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+    recommendation.like()
+    app.logger.info("Recommendation with ID %s like", recommendation.id)
+
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
+
+
+######################################################################
 # PURCHASE A PET
 ######################################################################
 # @app.route("/pets/<int:pet_id>/purchase", methods=["PUT"])
