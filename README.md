@@ -104,10 +104,6 @@ Retrieve API information
 
 List all recommendations with pagination
 
-```http
-GET /
-```
-
 Status Code | Note
 --- | ---
 200 | OK

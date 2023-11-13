@@ -48,7 +48,9 @@ def index():
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    """Returns Recommendations filtered and paginated"""
+    """Returns all of the Recommendations"""
+    page_index = request.args.get("page-index", type=int)
+    page_size = request.args.get("page-size", type=int)
 
     app.logger.info("Request for recommendation list")
     page_index = request.args.get("page-index", type=int, default=1)
