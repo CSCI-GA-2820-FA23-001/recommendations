@@ -215,10 +215,15 @@ class Recommendation(db.Model):
         return cls.query.all()
 
     @classmethod
-    def paginate(cls, page=1, per_page=10):
+    def paginate(cls, page=1, per_page=10, filters={}):
         """Returns list of the Recommendation in the database of a certain page at certain page size"""
         logger.info("Processing all Recommendation")
-        paginated_recommendations = cls.query.paginate(
+
+        query = cls.query
+        for k in filters.keys():
+            query = query.filter(cls[k] == filters[k])
+
+        paginated_recommendations = query.paginate(
             page=page, per_page=per_page, error_out=False
         )
         return paginated_recommendations.items

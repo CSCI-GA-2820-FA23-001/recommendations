@@ -12,7 +12,7 @@ DELETE /recommendations/{id} - deletes a Recommendation record in the database
 """
 
 from flask import jsonify, request, url_for, abort
-from service.models import Recommendation
+from service.models import Recommendation, RecommendationType
 from service.common import status  # HTTP Status Codes
 from . import app  # Import Flask application
 
@@ -48,13 +48,28 @@ def index():
 ######################################################################
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
-    """Returns all of the Recommendations"""
-    page_index = request.args.get("page-index", type=int)
-    page_size = request.args.get("page-size", type=int)
+    """Returns Recommendations filtered and paginated"""
 
     app.logger.info("Request for recommendation list")
-    # recommendations = Recommendation.all()
-    recommendations = Recommendation.paginate(page=page_index, per_page=page_size)
+    page_index = request.args.get("page-index", type=int, default=1)
+    page_size = request.args.get("per-page", type=int, default=10)
+    recommendation_type = request.args.get("type")
+
+    filters = {}
+    if recommendation_type:
+        app.logger.info("Find by recommendation type: %s", recommendation_type)
+        try:
+            type_value = getattr(RecommendationType, recommendation_type.upper())
+            filters.recommendation_type = recommendation_type
+        except AttributeError:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Invalid recommendation type: '{recommendation_type}'.",
+            )
+
+    recommendations = Recommendation.paginate(
+        page=page_index, per_page=page_size, filters=filters
+    )
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK
