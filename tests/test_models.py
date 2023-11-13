@@ -354,6 +354,20 @@ class TestRecommendation(unittest.TestCase):
         recs = Recommendation.all()
         self.assertEqual(len(recs), 5)
 
+    def test_paginate(self):
+        """It should List Recommendations with given page index and page size"""
+        # Create some test data
+        for _ in range(15):
+            rec = RecommendationFactory()
+            rec.create()
+
+        # Test pagination
+        recommendations_page1 = Recommendation.paginate(page=1, per_page=10)
+        recommendations_page2 = Recommendation.paginate(page=2, per_page=10)
+
+        self.assertEqual(len(recommendations_page1), 10)
+        self.assertEqual(len(recommendations_page2), 5)
+
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
         recs = Recommendation.all()

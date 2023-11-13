@@ -49,8 +49,12 @@ def index():
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     """Returns all of the Recommendations"""
+    page_index = request.args.get("page-index", type=int)
+    page_size = request.args.get("per-page", type=int)
+
     app.logger.info("Request for recommendation list")
-    recommendations = Recommendation.all()
+    # recommendations = Recommendation.all()
+    recommendations = Recommendation.paginate(page=page_index, per_page=page_size)
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK

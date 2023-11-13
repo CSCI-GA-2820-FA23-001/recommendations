@@ -59,13 +59,13 @@ Goals to implement:
 
 | URL | HTTP Method | Description
 | -------- | -------- | -------- |
-| [/](####GET-/) | GET | API version information |
-| [/recommendations/](####GET-/recommendations/) | GET | List recommendation by id |
-| [/recommendations/\<int:id\>](####GET-/recommendations/) | GET | Read recommendation by id |
-| [/recommendations/source_product_\<int:source_item_id\>](####GET-/recommendations/source_product_{id}) | GET | Read recommendation by source_product_id |
-| [/recommendations/](####POST-/recommendations/) | POST | Create recommendation |
-| [/recommendations/](####PUT-/recommendations/) | PUT | Update recommendation |
-| [/recommendations/\<int:id\>](####DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
+| [/](#get-/) | GET | API version information |
+| [/recommendations/](#get-/recommendations/) | GET | List recommendation by id |
+| [/recommendations/\<int:id\>](#get-/recommendations/) | GET | Read recommendation by id |
+| [/recommendations/source_product/?](#get-/recommendations/source_product/?) | GET | Read recommendation by source_product_id |
+| [/recommendations/](#post-/recommendations/) | POST | Create recommendation |
+| [/recommendations/](#put-/recommendations/) | PUT | Update recommendation |
+| [/recommendations/\<int:id\>](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
 
 ### File Structure
 
@@ -97,7 +97,7 @@ tests/              - test cases package
 
 #### GET /
 
-API information
+Retrieve API information
 
 #### GET /recommendations/
 
@@ -194,7 +194,6 @@ Response:
 Status Code | Note
 --- | ---
 200 | OK
-400 | Malformed payload
 415 | content_type must be application/json
 404 | Not found
 
