@@ -60,12 +60,12 @@ Goals to implement:
 | URL | HTTP Method | Description
 | -------- | -------- | -------- |
 | [/](#get-/) | GET | API version information |
-| [/recommendations?](#get-/recommendations) | GET | List recommendation by page |
-| [/recommendations/\<int:id\>](#get-/recommendations) | GET | Read recommendation by id |
+| [/recommendations?](#get-/recommendations?) | GET | List recommendation by page |
+| [/recommendations/{int:id}](#get-/recommendations/{id}) | GET | Read recommendation by id |
 | [/recommendations/source_product?](#get-/recommendations/source_product?) | GET | Read recommendation by source_product_id |
-| [/recommendations/](#post-/recommendations/) | POST | Create recommendation |
-| [/recommendations/](#put-/recommendations/) | PUT | Update recommendation |
-| [/recommendations/\<int:id\>](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
+| [/recommendations](#post-/recommendations) | POST | Create recommendation |
+| [/recommendations/{int:id}](#put-/recommendations/{id}) | PUT | Update recommendation |
+| [/recommendations/{int:id}](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
 
 
 ### File Structure
@@ -116,26 +116,37 @@ Status Code | Note
 
 Read recommendation by id
 
-Status Code | Note
---- | ---
-200 | OK
-404 | Not found
-
-#### GET /recommendations/source_product_{id}
-
-Read recommendation by source_product_id
+```http
+GET /recommendations/123
+```
 
 Status Code | Note
 --- | ---
 200 | OK
 404 | Not found
 
-#### POST /recommendations/
+#### GET /recommendations/source_product?
+
+Read recommendation by source_product_id/status
+
+```http
+GET /recommendations/source_product?source_product_id=123
+GET /recommendations/source_product?status=valid
+```
+
+Status Code | Note
+--- | ---
+200 | OK
+404 | Not found
+
+#### POST /recommendations
 
 Create a new recommendation:
 
 ```http
+POST /recommendations
 Content-Type: application/json
+
 {
   "source_item_id" : 123,
   "target_item_id" : 456,
@@ -165,19 +176,18 @@ Status Code | Note
 201 | Created
 415 | content_type must be application/json
 
-#### PUT /recommendations/
+#### PUT /recommendations/{id}
 
 Update a new recommendation
 
 ```http
+PUT /recommendations/625
 Content-Type: application/json
+
 {
-    "id" : 625,
-    "data" : {
-        "source_item_id": 88888
-        "recommendation_weight" : 0.9,
-        "status" : "VALID"
-    }
+  "source_item_id": 88888
+  "recommendation_weight" : 0.9,
+  "status" : "VALID"
 }
 ```
 
@@ -205,6 +215,10 @@ Status Code | Note
 #### DELETE /recommendations/{id}
 
 Delete recommendation by id
+
+```http
+DELETE /recommendations/123
+```
 
 Status Code | Note
 --- | ---
