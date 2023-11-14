@@ -272,9 +272,16 @@ class Recommendation(db.Model):
 
     @classmethod
     def find_by_source_item_id(cls, source_item_id: int) -> list:
-        """Returns all Recommendation with the given source_item_id"""
-        logger.info("Processing source id query for %s ...", source_item_id)
-        return cls.query.filter(cls.source_item_id == source_item_id)
+        """Returns all Recommendations with the given source_item_id, sorted by recommendation_weight"""
+        logger.info(
+            "Processing source id query for %s with sorting by recommendation weight...",
+            source_item_id,
+        )
+        return (
+            cls.query.filter(cls.source_item_id == source_item_id)
+            .order_by(cls.recommendation_weight.desc())
+            .all()
+        )
 
     @classmethod
     def filter_all_by_status(cls, status):

@@ -137,24 +137,6 @@ class TestRecommendation(unittest.TestCase):
         )
         self.assertEqual(found_recommendation.status, recommendation.status)
 
-    def test_find_by_source_item_id(self):
-        """It should find recommendations by source product id"""
-        recommendations = RecommendationFactory.create_batch(10)
-        for recommendation in recommendations:
-            recommendation.create()
-        source_item_id = recommendations[0].source_item_id
-        count = len(
-            [
-                recommendation
-                for recommendation in recommendations
-                if recommendation.source_item_id == source_item_id
-            ]
-        )
-        found = Recommendation.find_by_source_item_id(source_item_id)
-        self.assertEqual(found.count(), count)
-        for recommendation in found:
-            self.assertEqual(recommendation.source_item_id, source_item_id)
-
     def test_create_recommendation_raise_error(self):
         """Should raise DataValidationError if required field is not included or wrong type"""
         recommendation = Recommendation(
@@ -164,6 +146,33 @@ class TestRecommendation(unittest.TestCase):
             status=RecommendationStatus.VALID,
         )
         self.assertRaises(DataValidationError, recommendation.create)
+
+    def test_find_by_source_item_id(self):
+        """It should find recommendations by source product id"""
+        # Create recommendations with varying weights and the same source_item_id
+        source_item_id = 100  # Example source item id
+        weights = [0.1 * i for i in range(1, 11)]  # Example weights: 0.1, 0.2, ..., 1.0
+        for weight in weights:
+            recommendation = RecommendationFactory(
+                source_item_id=source_item_id, recommendation_weight=weight
+            )
+            recommendation.create()
+
+        # Retrieve and verify recommendations
+        found = Recommendation.find_by_source_item_id(source_item_id)
+        found_weights = [
+            recommendation.recommendation_weight for recommendation in found
+        ]
+
+        # Check if the number of recommendations is correct
+        self.assertEqual(len(found), len(weights))
+
+        # Check if recommendations are sorted by weight in descending order
+        self.assertEqual(found_weights, sorted(weights, reverse=True))
+
+        # Check if each recommendation has the correct source_item_id
+        for recommendation in found:
+            self.assertEqual(recommendation.source_item_id, source_item_id)
 
     def test_update_recommendation_target_item_id(self):
         """create and update recommendation with some data"""
@@ -445,6 +454,28 @@ class TestRecommendation(unittest.TestCase):
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
             self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+
+    def test_find_by_source_item_id_with_sorting(self):
+        """It should find recommendations by source product id and sort them by recommendation weight"""
+        recommendations = RecommendationFactory.create_batch(5)
+        source_item_id = recommendations[0].source_item_id
+
+        # Assuming weights are in ascending order for simplicity
+        sorted_weights = sorted(
+            [
+                rec.recommendation_weight
+                for rec in recommendations
+                if rec.source_item_id == source_item_id
+            ]
+        )
+
+        for recommendation in recommendations:
+            recommendation.create()
+
+        found = Recommendation.find_by_source_item_id(source_item_id)
+        found_weights = [rec.recommendation_weight for rec in found]
+
+        self.assertEqual(found_weights, sorted_weights)
 
     def test_find_all_by_type(self):
         """It should return all recommendations filtered by given type in the database"""
