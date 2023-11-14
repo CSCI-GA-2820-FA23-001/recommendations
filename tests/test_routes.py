@@ -13,7 +13,13 @@ from unittest import TestCase
 # from urllib.parse import quote_plus
 from service import app
 from service.common import status
-from service.models import db, init_db, Recommendation, RecommendationStatus
+from service.models import (
+    db,
+    init_db,
+    Recommendation,
+    RecommendationStatus,
+    RecommendationType,
+)
 from tests.factories import RecommendationFactory
 
 # Disable all but critical errors during normal test run
@@ -151,11 +157,15 @@ class TestRecommendationServer(TestCase):
         changed_weight = 0.0114
         response = self.client.put(
             f"{BASE_URL}/{test_id}",
-            json={"recommendation_weight": changed_weight},
+            json={
+                "recommendation_weight": changed_weight,
+                "recommendation_type": "CROSS_SELL",
+            },
         )
         data = response.get_json()
         self.assertNotEqual(data["recommendation_weight"], test_weight)
         self.assertEqual(data["recommendation_weight"], changed_weight)
+        self.assertEqual(data["recommendation_type"], "CROSS_SELL")
         self.assertEqual(data["id"], test_id)
 
     def test_delete_recommendation(self):
@@ -209,16 +219,50 @@ class TestRecommendationServer(TestCase):
             self.assertEqual(recommendation["status"], "VALID")
 
     def test_get_recommendation_list(self):
+        """It should Get a list of Recommendations"""
+        number = 3
+        recommendations = self._create_recommendations(number)
+        ids = []
+        for i in range(number):
+            ids.append(recommendations[i].id)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), number)
+        for i in range(number):
+            self.assertEqual(data[i]["id"], ids[i])
+
+    def test_get_recommendation_paginate(self):
         """It should Get a list of Recommendations with pagination"""
-        self._create_recommendations(15)
+        total_pages = 15
+        for _ in range(total_pages - 1):
+            rec = RecommendationFactory()
+            rec.recommendation_type = "UNKNOWN"
+            rec.create()
+        test_recommendation = RecommendationFactory()
+        test_recommendation.recommendation_type = "UP_SELL"
+        test_recommendation.create()
+
+        # should return all if page_size > total_pages
+        response = self.client.get(f"{BASE_URL}?page-size=100")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), total_pages)
+        # should only return the first 5
         response = self.client.get(f"{BASE_URL}?page-index=1&page-size=5")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 5)
+        # should only return the last 5
         response = self.client.get(f"{BASE_URL}?page-index=2&page-size=10")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 5)
+        # filtering should only get back the one that we changed
+        response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&type=UP_SELL")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 1)
 
     ######################################################################
     #  T E S T   S A D   P A T H S
@@ -270,9 +314,17 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_read_recommendations_by_source_item_id_empty_query(self):
-        """It should return 400 when sending with out source_item)id"""
+        """It should return 400 when sending with out source_item_id"""
         response = self.client.get(f"{BASE_URL}/source-product")
         self.assertEqual(response.status_code, 400)
+
+    def test_filter_recommendation_bad_type(self):
+        """It should return 400 whne given bad recommendation type query string"""
+        recommendation = RecommendationFactory()
+        # change recommendation type to a bad value
+        recommendation.create()
+        response = self.client.get(f"{BASE_URL}?type=INVALID_TYPE")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     ######################################################################
     #  T E S T   A C T I O N S

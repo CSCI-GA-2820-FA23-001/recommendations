@@ -100,9 +100,13 @@ tests/              - test cases package
 
 Retrieve API information
 
-#### GET /recommendations?page-index=1&page-size=10
+#### GET /recommendations?
 
-List all recommendations with pagination
+List all recommendations with pagination, optional filter by recommendation_type
+
+```http
+GET /recommendations?page-index=1&page-size=10&type=UP_SELL
+```
 
 Status Code | Note
 --- | ---

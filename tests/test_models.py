@@ -357,30 +357,34 @@ class TestRecommendation(unittest.TestCase):
     def test_paginate(self):
         """It should List Recommendations with given page index and page size"""
         # Create some test data
-        for _ in range(15):
+        for _ in range(14):
             rec = RecommendationFactory()
+            rec.recommendation_type = "UNKNOWN"
             rec.create()
 
-        # Test pagination
-        recommendations_page1 = Recommendation.paginate(page=1, per_page=10)
-        recommendations_page2 = Recommendation.paginate(page=2, per_page=10)
-
-        self.assertEqual(len(recommendations_page1), 10)
-        self.assertEqual(len(recommendations_page2), 5)
-
-    def test_paginate(self):
-        """It should List Recommendations with given page index and page size"""
-        # Create some test data
-        for _ in range(15):
-            rec = RecommendationFactory()
-            rec.create()
+        recommendation = RecommendationFactory()
+        recommendation.recommendation_type = "UP_SELL"
+        recommendation.create()
 
         # Test pagination
-        recommendations_page1 = Recommendation.paginate(page=1, per_page=10)
-        recommendations_page2 = Recommendation.paginate(page=2, per_page=10)
-
-        self.assertEqual(len(recommendations_page1), 10)
+        recommendations_page1 = Recommendation.paginate(page_index=1, page_size=5)
+        recommendations_page2 = Recommendation.paginate(page_index=2, page_size=10)
+        self.assertEqual(len(recommendations_page1), 5)
         self.assertEqual(len(recommendations_page2), 5)
+
+        # Test pagination with filter
+        recommendations_page3 = Recommendation.paginate(
+            page_index=1,
+            page_size=100,
+            rec_type=RecommendationType["UP_SELL"],
+        )
+        self.assertEqual(len(recommendations_page3), 1)
+        recommendations_page3 = Recommendation.paginate(
+            page_index=1,
+            page_size=100,
+            rec_type=RecommendationType["UNKNOWN"],
+        )
+        self.assertEqual(len(recommendations_page3), 14)
 
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
