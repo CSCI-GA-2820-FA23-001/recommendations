@@ -405,7 +405,6 @@ class TestRecommendation(unittest.TestCase):
         rec.number_of_likes = "string"
         self.assertRaises(DataValidationError, rec.like)
 
-
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
         recs = Recommendation.all()
