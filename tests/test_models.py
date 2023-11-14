@@ -73,6 +73,7 @@ class TestRecommendation(unittest.TestCase):
             recommendation_type=RecommendationType.UP_SELL,
             recommendation_weight=0.8,
             status=RecommendationStatus.VALID,
+            number_of_likes=0,
         )
         self.assertTrue(recommendation is not None)
         self.assertEqual(recommendation.id, None)
@@ -81,12 +82,14 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(recommendation.recommendation_type, RecommendationType.UP_SELL)
         self.assertEqual(recommendation.recommendation_weight, 0.8)
         self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+        self.assertEqual(recommendation.number_of_likes, 0)
         recommendation = Recommendation(
             source_item_id=123,
             target_item_id=456,
             recommendation_type=RecommendationType.CROSS_SELL,
             recommendation_weight=0.7,
             status=RecommendationStatus.DEPRECATED,
+            number_of_likes=0,
         )
         self.assertEqual(
             recommendation.recommendation_type, RecommendationType.CROSS_SELL
@@ -135,7 +138,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_recommendation.status, recommendation.status)
 
     def test_find_by_source_item_id(self):
-        """It should find Recommendations by source product id"""
+        """It should find recommendations by source product id"""
         recommendations = RecommendationFactory.create_batch(10)
         for recommendation in recommendations:
             recommendation.create()
@@ -386,6 +389,23 @@ class TestRecommendation(unittest.TestCase):
         )
         self.assertEqual(len(recommendations_page3), 14)
 
+    def test_like_a_recommendation(self):
+        """It should like the given recommendation"""
+        rec = RecommendationFactory()
+        rec.create()
+        self.assertEqual(rec.number_of_likes, 0)
+        rec.like()
+        self.assertEqual(rec.number_of_likes, 1)
+
+    def test_like_a_recommendation_raise_error(self):
+        """Like recommendation with invalid datatype should raise error"""
+        rec = RecommendationFactory()
+        rec.create()
+        self.assertEqual(rec.number_of_likes, 0)
+        rec.number_of_likes = "string"
+        self.assertRaises(DataValidationError, rec.like)
+
+
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
         recs = Recommendation.all()
@@ -426,3 +446,33 @@ class TestRecommendation(unittest.TestCase):
         for recommendation in found:
             self.assertEqual(recommendation.source_item_id, source_item_id)
             self.assertEqual(recommendation.status, RecommendationStatus.VALID)
+
+    def test_find_all_by_type(self):
+        """It should return all recommendations filtered by given type in the database"""
+        # Create 10 Recommendations
+        recommendations = RecommendationFactory.create_batch(10)
+        for recommendation in recommendations:
+            recommendation.create()
+        recommendation_type = recommendations[0].recommendation_type
+        cnt = len(
+            [
+                recommendation
+                for recommendation in recommendations
+                if recommendation.recommendation_type == recommendation_type
+            ]
+        )
+        found = Recommendation.find_by_recommendation_type(recommendation_type)
+        self.assertEqual(found.count(), cnt)
+        for recommendation in found:
+            self.assertEqual(recommendation.recommendation_type, recommendation_type)
+
+    def test_find_all_by_type_with_invalid_type(self):
+        """It should not allow invalid recommendation types"""
+        invalid_type_1 = "UP_SELL"
+        self.assertRaises(
+            AttributeError, Recommendation.find_by_recommendation_type, invalid_type_1
+        )
+        invalid_type_2 = 1
+        self.assertRaises(
+            AttributeError, Recommendation.find_by_recommendation_type, invalid_type_2
+        )

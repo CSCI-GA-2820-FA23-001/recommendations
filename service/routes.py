@@ -67,6 +67,7 @@ def list_recommendations():
     recommendations = Recommendation.paginate(
         page_index=page_index, page_size=page_size, rec_type=type_value
     )
+
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK
@@ -181,6 +182,26 @@ def delete_recommendations(recommendation_id):
 
     app.logger.info("Recommendation with ID [%s] delete complete.", recommendation_id)
     return "", status.HTTP_204_NO_CONTENT
+
+
+######################################################################
+# LIKE A RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>/like", methods=["PUT"])
+def like_recommendation(recommendation_id):
+    """
+    Like a Recommendation
+
+    This endpoint will like a Recommendation based the id specified in the path
+    """
+    app.logger.info("Request to like recommendation with id: %s", recommendation_id)
+    recommendation = Recommendation.find(recommendation_id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+    recommendation.like()
+    app.logger.info("Recommendation with ID %s like", recommendation.id)
+
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
 
 
 ######################################################################

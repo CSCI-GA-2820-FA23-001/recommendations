@@ -70,6 +70,7 @@ class Recommendation(db.Model):
         nullable=False,
         server_default=RecommendationStatus.UNKNOWN.name,
     )
+    number_of_likes = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -129,6 +130,25 @@ class Recommendation(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def like(self):
+        """
+        Likes a Recommendation
+        """
+        logger.info("Liking %s", self.id)
+        try:
+            logger.info("Attempting to like Recommendation with ID %s", self.id)
+            data = self.serialize()
+            data["number_of_likes"] = data["number_of_likes"] + 1
+            self.deserialize(data)
+            db.session.commit()
+            logger.info("Successfully liked Recommendation with ID %s", self.id)
+        except Exception as error:
+            logger.error("Error liking Recommendation: %s", error)
+            db.session.rollback()
+            raise DataValidationError(
+                "Error liking Recommendation: " + str(error)
+            ) from error
+
     def serialize(self):
         """Serializes a Recommendation into a dictionary"""
         return {
@@ -138,6 +158,7 @@ class Recommendation(db.Model):
             "recommendation_type": self.recommendation_type.name,
             "recommendation_weight": self.recommendation_weight,
             "status": self.status.name,
+            "number_of_likes": self.number_of_likes,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
@@ -166,6 +187,7 @@ class Recommendation(db.Model):
         try:
             self.source_item_id = self._deserialize_int_field(data, "source_item_id")
             self.target_item_id = self._deserialize_int_field(data, "target_item_id")
+            self.number_of_likes = self._deserialize_int_field(data, "number_of_likes")
             self.recommendation_weight = self._deserialize_recommendation_weight(data)
             if "recommendation_type" in data:
                 self.recommendation_type = RecommendationType[
@@ -258,6 +280,25 @@ class Recommendation(db.Model):
         return cls.query.filter(cls.status == status)
 
     @classmethod
+    def find_by_recommendation_type(
+        cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
+    ) -> list:
+        """Returns all Recommendations by their Type
+
+        :param recommendation_type: values are
+          ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
+        :type available: enum
+
+        :return: a collection of Recommendations that are available
+        :rtype: list
+
+        """
+        logger.info(
+            "Processing recommendation type query for %s ...", recommendation_type.name
+        )
+        return cls.query.filter(cls.recommendation_type == recommendation_type)
+
+    @classmethod
     def find_valid_by_source_item_id(cls, source_item_id: int) -> list:
         """Returns all valid recommendation with the given source_item_id"""
         logger.info("Processing source id query for %s ...", source_item_id)
@@ -271,25 +312,6 @@ class Recommendation(db.Model):
     #     """Returns all Recommendation with the given target_item_id"""
     #     logger.info("Processing target item id query for %s ...", target_item_id)
     #     return cls.query.filter(cls.target_item_id == target_item_id)
-
-    # @classmethod
-    # def find_by_recommendation_type(
-    #     cls, recommendation_type: RecommendationType = RecommendationType.UNKNOWN
-    # ) -> list:
-    #     """Returns all Recommendations by their Type
-
-    #     :param recommendation_type: values are
-    #       ['UNKNOWN', 'UP_SELL', 'CROSS_SELL', 'ACCESSORY', 'COMPLEMENTARY', 'SUBSTITUTE']
-    #     :type available: enum
-
-    #     :return: a collection of Recommendations that are available
-    #     :rtype: list
-
-    #     """
-    #     logger.info(
-    #         "Processing recommendation type query for %s ...", recommendation_type.name
-    #     )
-    #     return cls.query.filter(cls.recommendation_type == recommendation_type)
 
     # @classmethod
     # def find_by_recommendation_status(

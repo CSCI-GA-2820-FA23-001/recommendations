@@ -137,6 +137,10 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(
             returned_data["recommendation_type"], initial_data["recommendation_type"]
         )
+        self.assertEqual(returned_data["status"], initial_data["status"])
+        self.assertEqual(
+            returned_data["number_of_likes"], initial_data["number_of_likes"]
+        )
         self.assertEqual(
             returned_data["recommendation_weight"],
             initial_data["recommendation_weight"],
@@ -264,6 +268,37 @@ class TestRecommendationServer(TestCase):
         data = response.get_json()
         self.assertEqual(len(data), 1)
 
+    def test_like_recommendation(self):
+        """It should Like a Recommendation"""
+        recommendations = self._create_recommendations(1)
+        rec = recommendations[0]
+        self.assertEqual(rec.number_of_likes, 0)
+        response = self.client.put(f"{BASE_URL}/{rec.id}/like")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(f"{BASE_URL}/{rec.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        logging.debug("Response data: %s", data)
+        self.assertEqual(data["number_of_likes"], 1)
+
+    def test_read_recommendations_by_type(self):
+        """It should get a list recommendations by its recommendation type"""
+        recommendations = self._create_recommendations(10)
+        test_recommendation_type = recommendations[0].recommendation_type
+        same_type_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.recommendation_type == test_recommendation_type
+        ]
+        response = self.client.get(f"{BASE_URL}?type={test_recommendation_type.name}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(same_type_recommendations))
+        for recommendation in data:
+            self.assertEqual(
+                recommendation["recommendation_type"], test_recommendation_type.name
+            )
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
@@ -276,7 +311,7 @@ class TestRecommendationServer(TestCase):
         # message = response_data.get("message", "No message provided")
         # print("Error message:", message)
 
-    def test_create_pet_no_content_type(self):
+    def test_create_recommendation_no_content_type(self):
         """It should not Create a Recommendation with no content type"""
         response = self.client.post(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
@@ -319,29 +354,30 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_filter_recommendation_bad_type(self):
-        """It should return 400 whne given bad recommendation type query string"""
+        """It should return 400 when given bad recommendation type query string"""
         recommendation = RecommendationFactory()
-        # change recommendation type to a bad value
         recommendation.create()
         response = self.client.get(f"{BASE_URL}?type=INVALID_TYPE")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_like_recommendation_bad_id(self):
+        """It should return 404 when sending PUT to /recommendations/rec_id/like"""
+        recommendations = self._create_recommendations(1)
+        rec = recommendations[0]
+        self.assertEqual(rec.number_of_likes, 0)
+        response = self.client.put(f"{BASE_URL}/{rec.id+1}/like")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        self.assertIn("not found", data["message"])
+        response = self.client.get(f"{BASE_URL}/{rec.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        logging.debug("Response data: %s", data)
+        self.assertEqual(data["number_of_likes"], 0)
+
     ######################################################################
     #  T E S T   A C T I O N S
     ######################################################################
-
-    # def test_purchase_a_pet(self):
-    #     """It should Purchase a Pet"""
-    #     pets = self._create_pets(10)
-    #     available_pets = [pet for pet in pets if pet.available is True]
-    #     pet = available_pets[0]
-    #     response = self.client.put(f"{BASE_URL}/{pet.id}/purchase")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     response = self.client.get(f"{BASE_URL}/{pet.id}")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     data = response.get_json()
-    #     logging.debug("Response data: %s", data)
-    #     self.assertEqual(data["available"], False)
 
     # def test_purchase_not_available(self):
     #     """It should not Purchase a Pet that is not available"""

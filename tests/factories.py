@@ -59,5 +59,7 @@ class RecommendationFactory(factory.Factory):
         ]
     )
 
+    number_of_likes = 0
+
     created_at = factory.LazyFunction(datetime.utcnow)
     updated_at = factory.LazyFunction(datetime.utcnow)
