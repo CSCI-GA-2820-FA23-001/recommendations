@@ -18,7 +18,6 @@ from service.models import (
     init_db,
     Recommendation,
     RecommendationStatus,
-    RecommendationType,
 )
 from tests.factories import RecommendationFactory
 
