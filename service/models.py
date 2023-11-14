@@ -233,7 +233,30 @@ class Recommendation(db.Model):
     def all(cls):
         """Returns all of the Recommendation in the database"""
         logger.info("Processing all Recommendation")
+
         return cls.query.all()
+
+    @classmethod
+    def paginate(cls, page_index=1, page_size=10, rec_type=None):
+        """Returns list of the Recommendation in the database,
+        with optional pagination, filter rec_type
+        Params:
+            page_index: int
+            page_size: int
+            rec_type: String
+        Returns:
+            Array: filtered paginated results
+        """
+        logger.info("Processing all Recommendation")
+
+        qry = cls.query
+        if rec_type:
+            qry = qry.filter(cls.recommendation_type == rec_type)
+
+        paginated_recommendations = qry.paginate(
+            page=page_index, per_page=page_size, error_out=False
+        )
+        return paginated_recommendations.items
 
     @classmethod
     def find(cls, recommendation_id: int):
@@ -299,7 +322,8 @@ class Recommendation(db.Model):
     # ) -> list:
     #     """Returns all Recommendations by their Status
 
-    #     :param recommendation_status: values are ['UNKNOWN', 'VALID', 'OUT_OF_STOCK', 'DEPRECATED']
+    #     :param recommendation_status: values are
+    #       ['UNKNOWN', 'VALID', 'OUT_OF_STOCK', 'DEPRECATED']
 
     #     :type available: enum
 

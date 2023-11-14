@@ -13,7 +13,12 @@ from unittest import TestCase
 # from urllib.parse import quote_plus
 from service import app
 from service.common import status
-from service.models import db, init_db, Recommendation, RecommendationStatus
+from service.models import (
+    db,
+    init_db,
+    Recommendation,
+    RecommendationStatus,
+)
 from tests.factories import RecommendationFactory
 
 # Disable all but critical errors during normal test run
@@ -155,11 +160,15 @@ class TestRecommendationServer(TestCase):
         changed_weight = 0.0114
         response = self.client.put(
             f"{BASE_URL}/{test_id}",
-            json={"recommendation_weight": changed_weight},
+            json={
+                "recommendation_weight": changed_weight,
+                "recommendation_type": "CROSS_SELL",
+            },
         )
         data = response.get_json()
         self.assertNotEqual(data["recommendation_weight"], test_weight)
         self.assertEqual(data["recommendation_weight"], changed_weight)
+        self.assertEqual(data["recommendation_type"], "CROSS_SELL")
         self.assertEqual(data["id"], test_id)
 
     def test_delete_recommendation(self):
@@ -225,6 +234,38 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(len(data), number)
         for i in range(number):
             self.assertEqual(data[i]["id"], ids[i])
+
+    def test_get_recommendation_paginate(self):
+        """It should Get a list of Recommendations with pagination"""
+        total_pages = 15
+        for _ in range(total_pages - 1):
+            rec = RecommendationFactory()
+            rec.recommendation_type = "UNKNOWN"
+            rec.create()
+        test_recommendation = RecommendationFactory()
+        test_recommendation.recommendation_type = "UP_SELL"
+        test_recommendation.create()
+
+        # should return all if page_size > total_pages
+        response = self.client.get(f"{BASE_URL}?page-size=100")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), total_pages)
+        # should only return the first 5
+        response = self.client.get(f"{BASE_URL}?page-index=1&page-size=5")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        # should only return the last 5
+        response = self.client.get(f"{BASE_URL}?page-index=2&page-size=10")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+        # filtering should only get back the one that we changed
+        response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&type=UP_SELL")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 1)
 
     def test_like_recommendation(self):
         """It should Like a Recommendation"""
@@ -307,14 +348,16 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_read_recommendations_by_source_item_id_empty_query(self):
-        """It should return 400 when sending without source_item_id"""
+        """It should return 400 when sending with out source_item_id"""
         response = self.client.get(f"{BASE_URL}/source-product")
         self.assertEqual(response.status_code, 400)
 
-    def test_read_recommendations_by_invalid_type(self):
-        """It should return 400 when sending invalid recommendation type"""
-        response = self.client.get(f"{BASE_URL}?type=33")
-        self.assertEqual(response.status_code, 400)
+    def test_filter_recommendation_bad_type(self):
+        """It should return 400 when given bad recommendation type query string"""
+        recommendation = RecommendationFactory()
+        recommendation.create()
+        response = self.client.get(f"{BASE_URL}?type=INVALID_TYPE")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_like_recommendation_bad_id(self):
         """It should return 404 when sending PUT to /recommendations/rec_id/like"""

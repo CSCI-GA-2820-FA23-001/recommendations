@@ -1,4 +1,5 @@
 
+
 # NYU DevOps: Recommendation
 
 [![Build Status](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions/workflows/workflow.yml/badge.svg)](https://github.com/CSCI-GA-2820-FA23-001/recommendations/actions)
@@ -35,7 +36,7 @@ Goals to implement:
 | created_at | TIMESTAMP | Create time |
 | updated_at | TIMESTAMP | Update time |
 
-#### Items
+<!-- #### Items
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
@@ -45,26 +46,27 @@ Goals to implement:
 | price | FLOAT | Price of the item |
 | in_stock | BOOLEAN | Whether in stock |
 | created_at | TIMESTAMP | Create time |
-| updated_at | TIMESTAMP | Update time |
+| updated_at | TIMESTAMP | Update time | -->
 
-#### Categories
+<!-- #### Categories
 
 | Key | Type | Description |
 | -------- | -------- | -------- |
 | id | Key | Primary |
-| name | VARCHAR | Name of the category |
+| name | VARCHAR | Name of the category | -->
 
 ### API List
 
 | URL | HTTP Method | Description
 | -------- | -------- | -------- |
-| [/](#GET-/) | GET | API version information |
-| [/recommendations/](#GET-/recommendations/) | GET | List recommendation by id |
-| [/recommendations/\<int:id\>](#GET-/recommendations/) | GET | Read recommendation by id |
-| [/recommendations/source_product/?](#GET-/recommendations/source_product/?) | GET | Read recommendation by source_product_id |
-| [/recommendations/](#POST-/recommendations/) | POST | Create recommendation |
-| [/recommendations/](#PUT-/recommendations/) | PUT | Update recommendation |
-| [/recommendations/\<int:id\>](#DELETE-/recommendations/{id}) | DELETE | Delete recommendation |
+| [/](#get-/) | GET | API version information |
+| [/recommendations?](#get-/recommendations?) | GET | List recommendation by page |
+| [/recommendations/{int:id}](#get-/recommendations/{id}) | GET | Read recommendation by id |
+| [/recommendations/source_product?](#get-/recommendations/source_product?) | GET | Read recommendation by source_product_id |
+| [/recommendations](#post-/recommendations) | POST | Create recommendation |
+| [/recommendations/{int:id}](#put-/recommendations/{id}) | PUT | Update recommendation |
+| [/recommendations/{int:id}](#delete-/recommendations/{id}) | DELETE | Delete recommendation |
+
 
 ### File Structure
 
@@ -96,18 +98,14 @@ tests/              - test cases package
 
 #### GET /
 
-API information
+Retrieve API information
+
+#### GET /recommendations?
+
+List all recommendations with pagination, optional filter by recommendation_type
 
 ```http
-GET /
-```
-
-#### GET /recommendations
-
-List all recommendations
-
-```http
-GET /recommendations
+GET /recommendations?page-index=1&page-size=10&type=UP_SELL
 ```
 
 Status Code | Note
@@ -119,7 +117,7 @@ Status Code | Note
 Read recommendation by id
 
 ```http
-GET /recommendations/625
+GET /recommendations/123
 ```
 
 Status Code | Note
@@ -127,27 +125,13 @@ Status Code | Note
 200 | OK
 404 | Not found
 
-#### GET /recommendations/source_product/?
+#### GET /recommendations/source_product?
 
-Read recommendation by source_product
-
-```http
-GET /recommendations/source_product/?source_item_id=123
-```
-
-Response:
+Read recommendation by source_product_id/status
 
 ```http
-[{
-  "created_at": "2023-10-17T02:59:59.536538",
-  "id": 625,
-  "recommendation_type": "UNKNOWN",
-  "recommendation_weight": 0.9,
-  "source_item_id": 123,
-  "status": "VALID",
-  "target_item_id": 456,
-  "updated_at": "2023-10-17T03:00:32.831226"
-}]
+GET /recommendations/source_product?source_product_id=123
+GET /recommendations/source_product?status=valid
 ```
 
 Status Code | Note
@@ -155,13 +139,14 @@ Status Code | Note
 200 | OK
 404 | Not found
 
-#### POST /recommendations/
+#### POST /recommendations
 
 Create a new recommendation:
 
 ```http
 POST /recommendations
 Content-Type: application/json
+
 {
   "source_item_id" : 123,
   "target_item_id" : 456,
@@ -198,6 +183,7 @@ Update a new recommendation
 ```http
 PUT /recommendations/625
 Content-Type: application/json
+
 {
   "source_item_id": 88888
   "recommendation_weight" : 0.9,
@@ -223,13 +209,16 @@ Response:
 Status Code | Note
 --- | ---
 200 | OK
-400 | Malformed payload
 415 | content_type must be application/json
 404 | Not found
 
 #### DELETE /recommendations/{id}
 
 Delete recommendation by id
+
+```http
+DELETE /recommendations/123
+```
 
 Status Code | Note
 --- | ---

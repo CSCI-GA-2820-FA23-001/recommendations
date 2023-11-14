@@ -49,24 +49,24 @@ def index():
 @app.route("/recommendations", methods=["GET"])
 def list_recommendations():
     """Returns all of the Recommendations"""
-    app.logger.info("Request for recommendation list")
+    page_index = request.args.get("page-index", type=int, default=1)
+    page_size = request.args.get("page-size", type=int, default=10)
+    rec_type = request.args.get("type", default=None)
 
-    recommendations = []
-    recommendation_type = request.args.get("type")
-
-    if recommendation_type:
-        app.logger.info("Find by recommendation type: %s", recommendation_type)
+    type_value = None
+    if rec_type:
+        app.logger.info("Find by recommendation type: %s", rec_type)
         try:
-            type_value = getattr(RecommendationType, recommendation_type.upper())
+            type_value = getattr(RecommendationType, rec_type.upper())
         except AttributeError:
             abort(
                 status.HTTP_400_BAD_REQUEST,
-                f"Invalid recommendation type: '{recommendation_type}'.",
+                f"Invalid recommendation type: '{rec_type}'.",
             )
-        recommendations = Recommendation.find_by_recommendation_type(type_value)
-    else:
-        app.logger.info("Find all")
-        recommendations = Recommendation.all()
+
+    recommendations = Recommendation.paginate(
+        page_index=page_index, page_size=page_size, rec_type=type_value
+    )
 
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
@@ -158,9 +158,8 @@ def update_recommendation(recommendation_id):
     check_content_type("application/json")
     app.logger.info("Request to update recommendation with id: %s", recommendation_id)
     recommendation = Recommendation.find(recommendation_id)
-    if not recommendation:
-        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
-    recommendation.update(request.get_json())
+    if recommendation:
+        recommendation.update(request.get_json())
     app.logger.info("Recommendation with ID %s updated", recommendation.id)
 
     return jsonify(recommendation.serialize()), status.HTTP_200_OK
