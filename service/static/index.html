@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Recommendation Demo RESTful Service</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="static/images/newapp-icon.png">
+    <link rel="stylesheet" href="static/css/cerulean_bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Recommendation Demo RESTful Service</h1>
+        </div>
+
+        <!-- Flash Message -->
+        <div class="table-responsive">
+            <table class="table">
+                <tr>
+                    <td>Status:</td>
+                    <td><span id="flash_message"></span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FORM -->
+        <div class="col-md-12" id="form_data">
+            <h3>Create, Retrieve, Update, and Delete a Recommendation:</h3>
+            <div class="well">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="rec_id">Recommendation ID:</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="rec_id"
+                                placeholder="Enter ID of Recommendation">
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
+                            <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+                        </div>
+                    </div>
+                </div> <!-- form horizontal -->
+
+                <div class="form-horizontal">
+
+                    <!-- SOURCE ITEM ID -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="src_item_id">Source Item ID:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="src_item_id"
+                                placeholder="Enter Source Item ID for Recommendation">
+                        </div>
+                    </div>
+
+                    <!-- TARGET ITEM ID -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="tgt_item_id">Target Item ID:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="tgt_item_id"
+                                placeholder="Enter Target Item ID for Recommendation">
+                        </div>
+                    </div>
+
+                    <!-- TYPE -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="rec_type">Type:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="rec_type">
+                                <option value="UNKNOWN" selected>Unknown</option>
+                                <option value="UP_SELL">Up Sell</option>
+                                <option value="CROSS_SELL">Cross Sell</option>
+                                <option value="ACCESSORY">Accessory</option>
+                                <option value="COMPLEMENTARY">Complementary</option>
+                                <option value="SUBSTITUTE">Substitute</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="rec_status">Status:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="rec_status">
+                                <option value="UNKNOWN" selected>Unknown</option>
+                                <option value="VALID">Valid</option>
+                                <option value="OUT_OF_STOCK">Out of Stock</option>
+                                <option value="DEPRECATED">Deprecated</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- WEIGHT -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="rec_weight">Weight:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="rec_weight"
+                                placeholder="Enter Weight Between 0 and 1 for Recommendation">
+                        </div>
+                    </div>
+
+                    <!-- LIKES -->
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="num_of_likes">Number of Likes:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="num_of_likes"
+                                placeholder="Enter Number of Likes for Recommendation" value="0">
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT BUTTONS -->
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
+                            <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
+                            <button type="submit" class="btn btn-success" id="create-btn">Create</button>
+                            <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+                        </div>
+                    </div>
+                </div> <!-- form horizontal -->
+            </div> <!-- end well -->
+        </div> <!-- end Form -->
+
+        <!-- Search Results -->
+        <div class="table-responsive col-md-12" id="search_results">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <!--
+                            style="border-right: 1px dashed #000;"
+                        -->
+                        <th class="col-md-1">ID</th>
+                        <th class="col-md-1">Source Item</th>
+                        <th class="col-md-1">Target Item</th>
+                        <th class="col-md-1">Type</th>
+                        <th class="col-md-1">Status</th>
+                        <th class="col-md-1">Weight</th>
+                        <th class="col-md-1">Likes</th>
+                        <th class="col-md-2">Created Time</th>
+                        <th class="col-md-2">Updated Time</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <footer>
+            <br><br>
+            <p>&copy; NYU DevOps Company 2023</p>
+        </footer>
+
+    </div> <!-- container -->
+
+    <script type="text/javascript" src="static/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+
+    <!-- YOUR REST API -->
+    <script type="text/javascript" src="static/js/rest_api.js"></script>
+    <script type="text/javascript" src="static/js/form_validation.js"></script>
+
+</body>
+
+</html>
