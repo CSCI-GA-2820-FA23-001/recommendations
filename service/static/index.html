@@ -132,8 +132,8 @@
                             style="border-right: 1px dashed #000;"
                         -->
                         <th class="col-md-1">ID</th>
-                        <th class="col-md-1">Source Item</th>
-                        <th class="col-md-1">Target Item</th>
+                        <th class="col-md-1">Source</th>
+                        <th class="col-md-1">Target</th>
                         <th class="col-md-1">Type</th>
                         <th class="col-md-1">Status</th>
                         <th class="col-md-1">Weight</th>
@@ -144,7 +144,24 @@
                 </thead>
             </table>
         </div>
+        <div class="container mt-5">
+            <div class="form-group">
+                <label for="itemsPerPage">Items Per Page:</label>
+                <select id="itemsPerPage" class="form-control">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                </select>
+            </div>
 
+            <ul class="pagination" id="pagination">
+                <!-- Pagination links will be added here dynamically -->
+            </ul>
+
+            <div class="mt-3" id="content">
+                <!-- Page content will be loaded here dynamically -->
+            </div>
+        </div>
         <footer>
             <br><br>
             <p>&copy; NYU DevOps Company 2023</p>

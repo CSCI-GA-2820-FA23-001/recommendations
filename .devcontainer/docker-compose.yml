@@ -6,7 +6,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: .devcontainer/Dockerfile    
     hostname: nyu
     container_name: project
     volumes:

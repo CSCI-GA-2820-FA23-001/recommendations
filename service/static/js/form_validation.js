@@ -7,6 +7,7 @@ $(function () {
         if (regexForInt.test(value) || value === '') {
             lastId = value;
         } else {
+            alert("Invalid Input");
             $(this).val(lastId);
         }
     });
@@ -17,6 +18,7 @@ $(function () {
         if (regexForInt.test(value) || value === '') {
             lastSrcId = value;
         } else {
+            alert("Invalid Input");
             $(this).val(lastSrcId);
         }
     });
@@ -27,6 +29,7 @@ $(function () {
         if (regexForInt.test(value) || value === '') {
             lastTgtId = value;
         } else {
+            alert("Invalid Input");
             $(this).val(lastTgtId);
         }
     });
@@ -37,6 +40,7 @@ $(function () {
         if (regexForInt.test(value) || value === '') {
             lastLikes = value;
         } else {
+            alert("Invalid Input");
             $(this).val(lastLikes);
         }
     });
@@ -48,6 +52,7 @@ $(function () {
         if (regexForWeight.test(value) || value === '') {
             lastWeight = value;
         } else {
+            alert("Invalid Input");
             $(this).val(lastWeight);
         }
     });

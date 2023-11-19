@@ -188,35 +188,21 @@ $(function () {
 
     $("#search-btn").click(function () {
 
-        let name = $("#pet_name").val();
-        let category = $("#pet_category").val();
-        let available = $("#pet_available").val() == "true";
+        let page_index = 1; // $("#page_index").val();
+        let page_size = 10; //$("#page_size").val();
+        let rec_type = $("#rec_type").val();
 
-        let queryString = ""
+        let queryString = "" + 'page-index=' + page_index + '&page-size=' + page_size
 
-        if (name) {
-            queryString += 'name=' + name
-        }
-        if (category) {
-            if (queryString.length > 0) {
-                queryString += '&category=' + category
-            } else {
-                queryString += 'category=' + category
-            }
-        }
-        if (available) {
-            if (queryString.length > 0) {
-                queryString += '&available=' + available
-            } else {
-                queryString += 'available=' + available
-            }
+        if (rec_type) {
+            queryString += '&type=' + rec_type
         }
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/pets?${queryString}`,
+            url: `/recommendations?${queryString}`,
             contentType: "application/json",
             data: ''
         })
@@ -226,19 +212,22 @@ $(function () {
             $("#search_results").empty();
             let table = '<table class="table table-striped" cellpadding="10">'
             table += '<thead><tr>'
-            table += '<th class="col-md-2">ID</th>'
-            table += '<th class="col-md-2">Name</th>'
-            table += '<th class="col-md-2">Category</th>'
-            table += '<th class="col-md-2">Available</th>'
-            table += '<th class="col-md-2">Gender</th>'
-            table += '<th class="col-md-2">Birthday</th>'
+            table += '<th class="col-md-1">ID</th>'
+            table += '<th class="col-md-1">Source</th>'
+            table += '<th class="col-md-1">Target</th>'
+            table += '<th class="col-md-1">Type</th >'
+            table += '<th class="col-md-1">Status</th>'
+            table += '<th class="col-md-1">Weight</th>'
+            table += '<th class="col-md-1">Likes</th>'
+            table += '<th class="col-md-2">Created Time</th>'
+            table += '<th class="col-md-2">Updated Time</th>'
             table += '</tr></thead><tbody>'
-            let firstPet = "";
+            let firstRec = "";
             for (let i = 0; i < res.length; i++) {
-                let pet = res[i];
-                table += `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.category}</td><td>${pet.available}</td><td>${pet.gender}</td><td>${pet.birthday}</td></tr>`;
+                let rec = res[i];
+                table += `<tr id="row_${i}"><td>${rec.id}</td><td>${rec.source_item_id}</td><td>${rec.target_item_id}</td><td>${rec.recommendation_type}</td><td>${rec.status}</td><td>${rec.recommendation_weight}</td><td>${rec.number_of_likes}</td><td>${rec.created_at}</td><td>${rec.updated_at}</td></tr>`;
                 if (i == 0) {
-                    firstPet = pet;
+                    firstRec = rec;
                 }
             }
             table += '</tbody></table>';
