@@ -133,7 +133,7 @@ $(function () {
         })
 
         ajax.done(function (res) {
-            //alert(res.toSource())
+            // console.log(res)
             update_form_data(res)
             flash_message("Success")
         });
@@ -185,11 +185,9 @@ $(function () {
     // ****************************************
     // Search for a Recommendation
     // ****************************************
-
-    $("#search-btn").click(function () {
-
-        let page_index = 1; // $("#page_index").val();
-        let page_size = 10; //$("#page_size").val();
+    function recQuery() {
+        let page_index = $("#page_index").val();
+        let page_size = $("#page_size").val();
         let rec_type = $("#rec_type").val();
 
         let queryString = "" + 'page-index=' + page_index + '&page-size=' + page_size
@@ -208,7 +206,8 @@ $(function () {
         })
 
         ajax.done(function (res) {
-            //alert(res.toSource())
+            //console.log(res)
+
             $("#search_results").empty();
             let table = '<table class="table table-striped" cellpadding="10">'
             table += '<thead><tr>'
@@ -223,8 +222,8 @@ $(function () {
             table += '<th class="col-md-2">Updated Time</th>'
             table += '</tr></thead><tbody>'
             let firstRec = "";
-            for (let i = 0; i < res.length; i++) {
-                let rec = res[i];
+            for (let i = 0; i < res["items"].length; i++) {
+                let rec = res["items"][i];
                 table += `<tr id="row_${i}"><td>${rec.id}</td><td>${rec.source_item_id}</td><td>${rec.target_item_id}</td><td>${rec.recommendation_type}</td><td>${rec.status}</td><td>${rec.recommendation_weight}</td><td>${rec.number_of_likes}</td><td>${rec.created_at}</td><td>${rec.updated_at}</td></tr>`;
                 if (i == 0) {
                     firstRec = rec;
@@ -234,9 +233,20 @@ $(function () {
             $("#search_results").append(table);
 
             // copy the first result to the form
-            if (firstPet != "") {
-                update_form_data(firstPet)
+            if (firstRec != "") {
+                update_form_data(firstRec)
             }
+
+            // update search summary
+            let entry_start = (res["page"] - 1) * res["per_page"] + 1;
+            let entry_end = entry_start + res["items"].length - 1;
+            if (entry_start > entry_end) {
+                entry_start = -1
+                entry_end = -1
+            }
+            let search_summary = `Search Summary: Showing ${entry_start} to ${entry_end} of ${res["total"]} entries`;
+            $("#search_summary").empty();
+            $("#search_summary").append(search_summary);
 
             flash_message("Success")
         });
@@ -244,7 +254,9 @@ $(function () {
         ajax.fail(function (res) {
             flash_message(res.responseJSON.message)
         });
+    }
 
+    $("#search-btn").click(function () {
+        recQuery()
     });
-
 })

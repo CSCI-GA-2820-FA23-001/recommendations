@@ -88,8 +88,7 @@ class TestRecommendationServer(TestCase):
         """It should call the home page"""
         response = self.client.get("/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
-        self.assertEqual(data["name"], "Recommendation Demo REST API Service")
+        self.assertIn(b"Recommendation Demo RESTful Service", response.data)
 
     def test_health(self):
         """It should be healthy"""
@@ -230,7 +229,7 @@ class TestRecommendationServer(TestCase):
             ids.append(recommendations[i].id)
         response = self.client.get(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), number)
         for i in range(number):
             self.assertEqual(data[i]["id"], ids[i])
@@ -249,22 +248,22 @@ class TestRecommendationServer(TestCase):
         # should return all if page_size > total_pages
         response = self.client.get(f"{BASE_URL}?page-size=100")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), total_pages)
         # should only return the first 5
         response = self.client.get(f"{BASE_URL}?page-index=1&page-size=5")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), 5)
         # should only return the last 5
         response = self.client.get(f"{BASE_URL}?page-index=2&page-size=10")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), 5)
         # filtering should only get back the one that we changed
         response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&type=UP_SELL")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), 1)
 
     def test_like_recommendation(self):
@@ -291,7 +290,7 @@ class TestRecommendationServer(TestCase):
         ]
         response = self.client.get(f"{BASE_URL}?type={test_recommendation_type.name}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
+        data = response.get_json()["items"]
         self.assertEqual(len(data), len(same_type_recommendations))
         for recommendation in data:
             self.assertEqual(
