@@ -1,4 +1,18 @@
 $(function () {
+    var regexForPositive = /^[1-9]\d*$/; // positive number without leading zeros
+
+    var lastPage = '';
+    $('#page_index').on('input', function () {
+        var value = $(this).val();
+        if (regexForPositive.test(value) || value === '') {
+            lastPage = value;
+        } else {
+            alert("Invalid Input");
+            $(this).val(lastPage);
+        }
+    });
+
+
     var regexForInt = /^(0|[1-9][0-9]*)$/; // natural number without leading zeros
 
     var lastId = '';
