@@ -279,6 +279,35 @@ class TestRecommendationServer(TestCase):
         logging.debug("Response data: %s", data)
         self.assertEqual(data["number_of_likes"], 1)
 
+    def test_deactivate_recommendation(self):
+        """It should deactivate a Recommendation"""
+        recommendations = self._create_recommendations(1)
+        rec = recommendations[0]
+        response = self.client.put(f"{BASE_URL}/{rec.id}/deactivation")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        logging.debug("Response data: %s", data)
+        self.assertEqual(data["status"], "DEPRECATED")
+
+    def test_activate_recommendation(self):
+        """It should deactivate a Recommendation"""
+        recommendations = self._create_recommendations(2)
+        rec = recommendations[0]
+        response = self.client.put(f"{BASE_URL}/{rec.id}/activation?status=VALID")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        logging.debug("Response data: %s", data)
+        self.assertEqual(data["status"], "VALID")
+
+        rec = recommendations[1]
+        response = self.client.put(
+            f"{BASE_URL}/{rec.id}/activation?status=OUT_OF_STOCK"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        logging.debug("Response data: %s", data)
+        self.assertEqual(data["status"], "OUT_OF_STOCK")
+
     def test_read_recommendations_by_type(self):
         """It should get a list recommendations by its recommendation type"""
         recommendations = self._create_recommendations(10)
@@ -372,6 +401,17 @@ class TestRecommendationServer(TestCase):
         data = response.get_json()
         logging.debug("Response data: %s", data)
         self.assertEqual(data["number_of_likes"], 0)
+
+    def test_activate_recommendation_bad_status(self):
+        """It should return 400 when sending PUT to /recommendations/rec_id/activation without valid query of status"""
+        recommendations = self._create_recommendations(2)
+        rec = recommendations[0]
+        response = self.client.put(f"{BASE_URL}/{rec.id}/activation")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        rec = recommendations[1]
+        response = self.client.put(f"{BASE_URL}/{rec.id}/activation?status=null")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     ######################################################################
     #  T E S T   A C T I O N S
