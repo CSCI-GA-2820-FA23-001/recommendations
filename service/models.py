@@ -253,10 +253,7 @@ class Recommendation(db.Model):
         if rec_type:
             qry = qry.filter(cls.recommendation_type == rec_type)
 
-        paginated_recommendations = qry.paginate(
-            page=page_index, per_page=page_size, error_out=False
-        )
-        return paginated_recommendations.items
+        return qry.paginate(page=page_index, per_page=page_size, error_out=False)
 
     @classmethod
     def find(cls, recommendation_id: int):

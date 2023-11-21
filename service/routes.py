@@ -31,16 +31,8 @@ def healthcheck():
 ######################################################################
 @app.route("/")
 def index():
-    """Root URL response"""
-    app.logger.info("Request for Root URL")
-    return (
-        jsonify(
-            name="Recommendation Demo REST API Service",
-            version="1.0",
-            # paths=url_for("list_recommendations", _external=True),
-        ),
-        status.HTTP_200_OK,
-    )
+    """Base URL for our service"""
+    return app.send_static_file("index.html")
 
 
 ######################################################################
@@ -64,13 +56,23 @@ def list_recommendations():
                 f"Invalid recommendation type: '{rec_type}'.",
             )
 
-    recommendations = Recommendation.paginate(
+    paginated_recommendations = Recommendation.paginate(
         page_index=page_index, page_size=page_size, rec_type=type_value
     )
 
-    results = [recommendation.serialize() for recommendation in recommendations]
-    app.logger.info("Returning %d recommendations", len(results))
-    return jsonify(results), status.HTTP_200_OK
+    results = {
+        "page": paginated_recommendations.page,
+        "per_page": paginated_recommendations.per_page,
+        "total": paginated_recommendations.total,
+        "pages": paginated_recommendations.pages,
+        "items": [
+            recommendation.serialize()
+            for recommendation in paginated_recommendations.items
+        ],
+    }
+
+    app.logger.info("Returning %d recommendations", len(results["items"]))
+    return results, status.HTTP_200_OK
 
 
 ######################################################################

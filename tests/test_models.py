@@ -379,8 +379,10 @@ class TestRecommendation(unittest.TestCase):
         recommendation.create()
 
         # Test pagination
-        recommendations_page1 = Recommendation.paginate(page_index=1, page_size=5)
-        recommendations_page2 = Recommendation.paginate(page_index=2, page_size=10)
+        recommendations_page1 = Recommendation.paginate(page_index=1, page_size=5).items
+        recommendations_page2 = Recommendation.paginate(
+            page_index=2, page_size=10
+        ).items
         self.assertEqual(len(recommendations_page1), 5)
         self.assertEqual(len(recommendations_page2), 5)
 
@@ -389,13 +391,13 @@ class TestRecommendation(unittest.TestCase):
             page_index=1,
             page_size=100,
             rec_type=RecommendationType["UP_SELL"],
-        )
+        ).items
         self.assertEqual(len(recommendations_page3), 1)
         recommendations_page3 = Recommendation.paginate(
             page_index=1,
             page_size=100,
             rec_type=RecommendationType["UNKNOWN"],
-        )
+        ).items
         self.assertEqual(len(recommendations_page3), 14)
 
     def test_like_a_recommendation(self):
