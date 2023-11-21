@@ -283,6 +283,8 @@ class TestRecommendationServer(TestCase):
         """It should deactivate a Recommendation"""
         recommendations = self._create_recommendations(1)
         rec = recommendations[0]
+        response = self.client.put(f"{BASE_URL}/{rec.id+1}/deactivation")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response = self.client.put(f"{BASE_URL}/{rec.id}/deactivation")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
@@ -403,7 +405,7 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(data["number_of_likes"], 0)
 
     def test_activate_recommendation_bad_status(self):
-        """It should return 400 when sending PUT to /recommendations/rec_id/activation without valid query of status"""
+        """It should return 400 when sending PUT to /recommendations/rec_id/activation without valid query of status and return 404 if recommendation not found"""
         recommendations = self._create_recommendations(2)
         rec = recommendations[0]
         response = self.client.put(f"{BASE_URL}/{rec.id}/activation")
@@ -412,6 +414,9 @@ class TestRecommendationServer(TestCase):
         rec = recommendations[1]
         response = self.client.put(f"{BASE_URL}/{rec.id}/activation?status=null")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.put(f"{BASE_URL}/{rec.id+1}/activation")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     #  T E S T   A C T I O N S
