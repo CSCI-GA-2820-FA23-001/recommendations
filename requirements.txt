@@ -25,5 +25,11 @@ green==3.4.3
 factory-boy==3.2.1
 coverage==7.1.0
 
+# Behavior Driven Development
+behave==1.2.6
+selenium==4.10.0
+compare==0.2b0
+requests==2.31.0
+
 # Utilities
 httpie==3.2.1

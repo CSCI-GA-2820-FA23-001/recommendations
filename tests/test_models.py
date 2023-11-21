@@ -138,7 +138,7 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(found_recommendation.status, recommendation.status)
 
     def test_create_recommendation_raise_error(self):
-        """Should raise DataValidationError if required field is not included or wrong type"""
+        """It should raise DataValidationError if required field is not included or wrong type"""
         recommendation = Recommendation(
             source_item_id=123,
             recommendation_type=RecommendationType.UP_SELL,
