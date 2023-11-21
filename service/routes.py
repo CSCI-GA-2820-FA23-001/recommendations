@@ -207,6 +207,43 @@ def like_recommendation(recommendation_id):
 
 
 ######################################################################
+# Activate and Deactivate a RECOMMENDATION
+######################################################################
+@app.route("/recommendations/<int:recommendation_id>/deactivation", methods=["PUT"])
+def deactivate_recommendation(recommendation_id):
+    """
+    Deactivate a Recommendation
+    """
+    app.logger.info(
+        "Request to deactivate recommendation with id: %s", recommendation_id
+    )
+    recommendation = Recommendation.find(recommendation_id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+    recommendation.deactivate()
+
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
+
+
+@app.route("/recommendations/<int:recommendation_id>/activation", methods=["PUT"])
+def activate_recommendation(recommendation_id):
+    """
+    Activate a Recommendation
+    """
+    app.logger.info("Request to activate recommendation with id: %s", recommendation_id)
+    activated_status = request.args.get("status", default=None)
+    valid_status = ["VALID", "OUT_OF_STOCK"]
+    recommendation = Recommendation.find(recommendation_id)
+    if not recommendation:
+        abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+    if activated_status not in valid_status:
+        abort(status.HTTP_400_BAD_REQUEST, "status for activation is required")
+    recommendation.activate(activated_status)
+
+    return jsonify(recommendation.serialize()), status.HTTP_200_OK
+
+
+######################################################################
 # PURCHASE A PET
 ######################################################################
 # @app.route("/pets/<int:pet_id>/purchase", methods=["PUT"])

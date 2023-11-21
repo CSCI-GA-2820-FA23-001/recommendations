@@ -10,6 +10,7 @@ Test cases can be run with:
 import os
 import logging
 import unittest
+import random
 from datetime import datetime
 from werkzeug.exceptions import NotFound
 
@@ -415,6 +416,23 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(rec.number_of_likes, 0)
         rec.number_of_likes = "string"
         self.assertRaises(DataValidationError, rec.like)
+
+    def test_deactivate_a_recommendation(self):
+        """It should deactivate the given recommendation"""
+        rec = RecommendationFactory()
+        rec.create()
+        rec.deactivate()
+        self.assertEqual(rec.status, RecommendationStatus.DEPRECATED)
+
+    def test_activate_a_recommendation(self):
+        """It should activate the given recommendation with certain status"""
+        recommendations = RecommendationFactory.create_batch(10)
+        activated_status = ["VALID", "OUT_OF_STOCK"]
+        for recommendation in recommendations:
+            recommendation.create()
+            idx = random.choice([0, 1])
+            recommendation.activate(activated_status[idx])
+            self.assertNotEqual(recommendation.status, RecommendationStatus.DEPRECATED)
 
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
