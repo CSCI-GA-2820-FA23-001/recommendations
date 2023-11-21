@@ -149,6 +149,25 @@ class Recommendation(db.Model):
                 "Error liking Recommendation: " + str(error)
             ) from error
 
+    def deactivate(self):
+        """
+        Deactivate a Recommendation
+        """
+        logger.info("Deactivating %s", self.id)
+        try:
+            logger.info("Attempting to deactivate Recommendation with ID %s", self.id)
+            data = self.serialize()
+            data["status"] = "DEPRECATED"
+            self.deserialize(data)
+            db.session.commit()
+            logger.info("Successfully deactivated Recommendation with ID %s", self.id)
+        except Exception as error:
+            logger.error("Error deactivating Recommendation: %s", error)
+            db.session.rollback()
+            raise DataValidationError(
+                "Error deactivating Recommendation: " + str(error)
+            ) from error
+
     def serialize(self):
         """Serializes a Recommendation into a dictionary"""
         return {

@@ -416,6 +416,13 @@ class TestRecommendation(unittest.TestCase):
         rec.number_of_likes = "string"
         self.assertRaises(DataValidationError, rec.like)
 
+    def test_deactivate_a_recommendation(self):
+        """It should deactivate the given recommendation"""
+        rec = RecommendationFactory()
+        rec.create()
+        rec.deactivate()
+        self.assertEqual(rec.status, RecommendationStatus.DEPRECATED)
+
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
         recs = Recommendation.all()
