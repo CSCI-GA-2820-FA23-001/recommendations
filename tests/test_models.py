@@ -10,9 +10,9 @@ Test cases can be run with:
 import os
 import logging
 import unittest
+import random
 from datetime import datetime
 from werkzeug.exceptions import NotFound
-import random
 
 from service.models import (
     Recommendation,
