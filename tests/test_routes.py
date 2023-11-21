@@ -405,7 +405,10 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(data["number_of_likes"], 0)
 
     def test_activate_recommendation_bad_status(self):
-        """It should return 400 when sending PUT to /recommendations/rec_id/activation without valid query of status and return 404 if recommendation not found"""
+        """
+        It should return 400 when sending PUT to /recommendations/rec_id/activation without valid query of status.
+        It should return 404 if recommendation not found.
+        """
         recommendations = self._create_recommendations(2)
         rec = recommendations[0]
         response = self.client.put(f"{BASE_URL}/{rec.id}/activation")
