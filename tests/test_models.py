@@ -12,6 +12,7 @@ import logging
 import unittest
 from datetime import datetime
 from werkzeug.exceptions import NotFound
+import random
 
 from service.models import (
     Recommendation,
@@ -422,6 +423,16 @@ class TestRecommendation(unittest.TestCase):
         rec.create()
         rec.deactivate()
         self.assertEqual(rec.status, RecommendationStatus.DEPRECATED)
+
+    def test_activate_a_recommendation(self):
+        """It should activate the given recommendation with certain status"""
+        recommendations = RecommendationFactory.create_batch(10)
+        activated_status = ["VALID", "OUT_OF_STOCK"]
+        for recommendation in recommendations:
+            recommendation.create()
+            idx = random.choice([0, 1])
+            recommendation.activate(activated_status[idx])
+            self.assertNotEqual(recommendation.status, RecommendationStatus.DEPRECATED)
 
     def test_filter_all_by_status(self):
         """It should return all recommendations filtered by given status in the database"""
