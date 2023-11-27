@@ -17,6 +17,17 @@ Feature: The recommendation service back-end
         Then I should see "Recommendation Demo RESTful Service" in the title
         And I should not see "404 Not Found"
 
+    Scenario: Read recommendations by type(Upper Sell)
+        When I visit the "Home Page"
+        And I select "Up Sell" in the "Type" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "UP_SELL" in the results
+        And I should not see "CROSS_SELL" in the results
+        And I should not see "ACCESSORY" in the results
+        And I should not see "COMPLEMENTARY" in the results
+        And I should not see "SUBSTITUTE" in the results
+
 # Scenario: Create a Pet
 #     When I visit the "Home Page"
 #     And I set the "Name" to "Happy"

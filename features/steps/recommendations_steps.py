@@ -33,9 +33,9 @@ HTTP_204_NO_CONTENT = 204
 
 @given("the following recommendations")
 def step_impl(context):
-    """Delete all Pets and load new ones"""
+    """Delete all Recommendations and load new ones"""
 
-    # List all of the pets and delete them one by one
+    # List all of the recommendations and delete them one by one
     rest_endpoint = f"{context.base_url}/recommendations"
     context.resp = requests.get(rest_endpoint)
     assert context.resp.status_code == HTTP_200_OK
@@ -43,7 +43,7 @@ def step_impl(context):
         context.resp = requests.delete(f"{rest_endpoint}/{rec['id']}")
         assert context.resp.status_code == HTTP_204_NO_CONTENT
 
-    # load the database with new pets
+    # load the database with new recommendations
     for row in context.table:
         payload = {
             "source_item_id": int(row["source_item_id"]),
