@@ -72,6 +72,21 @@ Feature: The recommendation service back-end
         And I should not see "UNKNOWN" in the results
         And I should not see "DEPRECATED" in the results
 
+    Scenario: Retrive recommendations by id
+        When I visit the "Home Page"
+        And I select "Up Sell" in the "Type" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        When I copy the "Id" field
+        And I press the "Clear" button
+        And I paste the "Id" field
+        And I press the "Retrieve" button
+        Then I should see the message "Success"
+        And I should see "123" in the "src item id" field
+        And I should see "456" in the "tgt item id" field
+        And I should see "0.5" in the "Weight" field
+        And I should see "10" in the "num of likes" field
+
 # Scenario: Create a Pet
 #     When I visit the "Home Page"
 #     And I set the "Name" to "Happy"
