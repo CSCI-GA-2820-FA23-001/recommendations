@@ -328,6 +328,24 @@ class TestRecommendationServer(TestCase):
                 recommendation["recommendation_type"], test_recommendation_type.name
             )
 
+    def test_read_recommendations_by_status(self):
+        """It should get a list recommendations by its recommendation status"""
+        recommendations = self._create_recommendations(10)
+        test_recommendation_status = recommendations[0].status
+        same_status_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.status == test_recommendation_status
+        ]
+        response = self.client.get(
+            f"{BASE_URL}?status={test_recommendation_status.name}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()["items"]
+        self.assertEqual(len(data), len(same_status_recommendations))
+        for recommendation in data:
+            self.assertEqual(recommendation["status"], test_recommendation_status.name)
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
