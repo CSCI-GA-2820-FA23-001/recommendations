@@ -12,7 +12,7 @@ DELETE /recommendations/{id} - deletes a Recommendation record in the database
 """
 
 from flask import jsonify, request, url_for, abort
-from service.models import Recommendation, RecommendationType
+from service.models import Recommendation, RecommendationType, RecommendationStatus
 from service.common import status  # HTTP Status Codes
 from . import app  # Import Flask application
 
@@ -44,9 +44,11 @@ def list_recommendations():
     page_index = request.args.get("page-index", type=int, default=1)
     page_size = request.args.get("page-size", type=int, default=10)
     rec_type = request.args.get("type", default=None)
-
+    rec_status = request.args.get("status", default=None)
     type_value = None
-    if rec_type:
+    status_value = None
+
+    if rec_type is not None:
         app.logger.info("Find by recommendation type: %s", rec_type)
         try:
             type_value = getattr(RecommendationType, rec_type.upper())
@@ -55,9 +57,20 @@ def list_recommendations():
                 status.HTTP_400_BAD_REQUEST,
                 f"Invalid recommendation type: '{rec_type}'.",
             )
-
+    elif rec_status is not None:
+        app.logger.info("Find by recommendation status: %s", rec_status)
+        try:
+            status_value = getattr(RecommendationStatus, rec_status.upper())
+        except AttributeError:
+            abort(
+                status.HTTP_400_BAD_REQUEST,
+                f"Invalid recommendation type: '{rec_status}'.",
+            )
     paginated_recommendations = Recommendation.paginate(
-        page_index=page_index, page_size=page_size, rec_type=type_value
+        page_index=page_index,
+        page_size=page_size,
+        rec_type=type_value,
+        rec_status=status_value,
     )
 
     results = {

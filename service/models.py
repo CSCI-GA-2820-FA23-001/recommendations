@@ -261,7 +261,7 @@ class Recommendation(db.Model):
         return cls.query.all()
 
     @classmethod
-    def paginate(cls, page_index=1, page_size=10, rec_type=None):
+    def paginate(cls, page_index=1, page_size=10, rec_type=None, rec_status=None):
         """Returns list of the Recommendation in the database,
         with optional pagination, filter rec_type
         Params:
@@ -274,8 +274,10 @@ class Recommendation(db.Model):
         logger.info("Processing all Recommendation")
 
         qry = cls.query
-        if rec_type:
+        if rec_type is not None:
             qry = qry.filter(cls.recommendation_type == rec_type)
+        elif rec_status is not None:
+            qry = qry.filter(cls.status == rec_status)
 
         return qry.paginate(page=page_index, per_page=page_size, error_out=False)
 

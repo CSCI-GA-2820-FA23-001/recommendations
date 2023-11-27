@@ -7,22 +7,22 @@ $(function () {
     // Updates the form with data from the response
     function update_form_data(res) {
         $("#rec_id").val(res.id);
-        $("#src_item_id").val(res.source_item_id);
-        $("#tgt_item_id").val(res.target_item_id);
+        $("#rec_src_item_id").val(res.source_item_id);
+        $("#rec_tgt_item_id").val(res.target_item_id);
         $("#rec_type").val(res.recommendation_type);
         $("#rec_status").val(res.status);
         $("#rec_weight").val(res.recommendation_weight);
-        $("#num_of_likes").val(res.number_of_likes);
+        $("#rec_num_of_likes").val(res.number_of_likes);
     }
 
     /// Clears all form fields
     function clear_form_data() {
-        $("#src_item_id").val("");
-        $("#tgt_item_id").val("");
+        $("#rec_src_item_id").val("");
+        $("#rec_tgt_item_id").val("");
         $("#rec_type").val("");
         $("#rec_status").val("");
         $("#rec_weight").val("");
-        $("#num_of_likes").val("");
+        $("#rec_num_of_likes").val("");
     }
 
     // Updates the flash message area
@@ -36,12 +36,12 @@ $(function () {
     // ****************************************
 
     $("#create-btn").click(function () {
-        let src_item_id = parseInt($("#src_item_id").val());
-        let tgt_item_id = parseInt($("#tgt_item_id").val());
+        let src_item_id = parseInt($("#rec_src_item_id").val());
+        let tgt_item_id = parseInt($("#rec_tgt_item_id").val());
         let type = $("#rec_type").val();
         let status = $("#rec_status").val();
         let weight = parseFloat($("#rec_weight").val());
-        let likes = parseInt($("#num_of_likes").val());
+        let likes = parseInt($("#rec_num_of_likes").val());
 
         let data = {
             "source_item_id": src_item_id,
@@ -84,7 +84,7 @@ $(function () {
         let type = $("#rec_type").val();
         let status = $("#rec_status").val();
         let weight = parseFloat($("#rec_weight").val());
-        let likes = parseInt($("#num_of_likes").val());
+        let likes = parseInt($("#rec_num_of_likes").val());
 
         let data = {
             "source_item_id": src_item_id,
@@ -189,11 +189,16 @@ $(function () {
         let page_index = $("#page_index").val();
         let page_size = $("#page_size").val();
         let rec_type = $("#rec_type").val();
+        let rec_status = $("#rec_status").val();
 
         let queryString = "" + 'page-index=' + page_index + '&page-size=' + page_size
 
         if (rec_type) {
             queryString += '&type=' + rec_type
+        }
+
+        if (rec_status) {
+            queryString += '&status=' + rec_status
         }
 
         $("#flash_message").empty();
