@@ -87,6 +87,22 @@ Feature: The recommendation service back-end
         And I should see "0.5" in the "Weight" field
         And I should see "10" in the "num of likes" field
 
+    Scenario: List all recommendations
+        When I visit the "Home Page"
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "123" in the results
+        And I should see "789" in the results
+        And I should see "222" in the results
+        And I should see "456" in the results
+        And I should see "101" in the results
+        And I should see "333" in the results
+        And I should see "UP_SELL" in the results
+        And I should see "CROSS_SELL" in the results
+        And I should see "ACCESSORY" in the results
+        And I should not see "362" in the results
+        And I should not see "753" in the results
+
 # Scenario: Create a Pet
 #     When I visit the "Home Page"
 #     And I set the "Name" to "Happy"
