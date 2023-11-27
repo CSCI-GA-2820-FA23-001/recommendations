@@ -102,6 +102,22 @@ Feature: The recommendation service back-end
         And I should see "ACCESSORY" in the results
         And I should not see "362" in the results
         And I should not see "753" in the results
+        
+    Scenario: Retrive recommendations by source_item_id and filtered by status
+        When I visit the "Home Page"
+        And I type in "123" in search field "source_item_id"
+        And I select "VALID" in the "status" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        When I copy the "Id" field
+        And I press the "Clear" button
+        And I paste the "Id" field
+        And I press the "Retrieve" button
+        Then I should see the message "Success"
+        And I should see "123" in the "src item id" field
+        And I should see "456" in the "tgt item id" field
+        And I should see "0.5" in the "Weight" field
+        And I should see "10" in the "num of likes" field
 
 # Scenario: Create a Pet
 #     When I visit the "Home Page"
