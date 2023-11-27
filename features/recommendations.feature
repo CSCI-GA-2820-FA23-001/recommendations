@@ -17,9 +17,8 @@ Feature: The recommendation service back-end
         Then I should see "Recommendation Demo RESTful Service" in the title
         And I should not see "404 Not Found"
 
-    Scenario: Read recommendations by type(UPPER_SELL)
+    Scenario: Read recommendations by type
         When I visit the "Home Page"
-        And I press the "Clear" button
         And I select "Up Sell" in the "Type" dropdown
         And I press the "Search" button
         Then I should see the message "Success"
@@ -28,16 +27,49 @@ Feature: The recommendation service back-end
         And I should not see "ACCESSORY" in the results
         And I should not see "COMPLEMENTARY" in the results
         And I should not see "SUBSTITUTE" in the results
+        When I press the "Clear" button
+        And I select "Cross Sell" in the "Type" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "CROSS_SELL" in the results
+        And I should not see "UP_SELL" in the results
+        And I should not see "ACCESSORY" in the results
+        And I should not see "COMPLEMENTARY" in the results
+        And I should not see "SUBSTITUTE" in the results
+        When I press the "Clear" button
+        And I select "Accessory" in the "Type" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "ACCESSORY" in the results
+        And I should not see "UP_SELL" in the results
+        And I should not see "CROSS_SELL" in the results
+        And I should not see "COMPLEMENTARY" in the results
+        And I should not see "SUBSTITUTE" in the results
 
-    Scenario: Read recommendations by status(VALID)
+    Scenario: Read recommendations by status
         When I visit the "Home Page"
-        And I press the "Clear" button
         And I select "Valid" in the "Status" dropdown
         And I press the "Search" button
         Then I should see the message "Success"
         And I should see "VALID" in the results
         And I should not see "UNKNOWN" in the results
         And I should not see "OUT_OF_STOCK" in the results
+        And I should not see "DEPRECATED" in the results
+        When I press the "Clear" button
+        And I select "Deprecated" in the "Status" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "DEPRECATED" in the results
+        And I should not see "VALID" in the results
+        And I should not see "OUT_OF_STOCK" in the results
+        And I should not see "UNKNOWN" in the results
+        When I press the "Clear" button
+        And I select "Out of Stock" in the "Status" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "OUT_OF_STOCK" in the results
+        And I should not see "VALID" in the results
+        And I should not see "UNKNOWN" in the results
         And I should not see "DEPRECATED" in the results
 
 # Scenario: Create a Pet
