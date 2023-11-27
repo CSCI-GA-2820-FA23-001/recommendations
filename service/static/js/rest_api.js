@@ -189,11 +189,16 @@ $(function () {
         let page_index = $("#page_index").val();
         let page_size = $("#page_size").val();
         let rec_type = $("#rec_type").val();
+        let rec_status = $("#rec_status").val();
 
         let queryString = "" + 'page-index=' + page_index + '&page-size=' + page_size
 
         if (rec_type) {
             queryString += '&type=' + rec_type
+        }
+
+        if (rec_status) {
+            queryString += '&status=' + rec_status
         }
 
         $("#flash_message").empty();

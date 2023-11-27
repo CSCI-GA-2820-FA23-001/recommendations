@@ -149,8 +149,8 @@ def step_impl(context, message):
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
-# prefixed by ID_PREFIX so the Name field has an id='pet_name'
-# We can then lowercase the name and prefix with pet_ to get the id
+# prefixed by ID_PREFIX so the Name field has an id='rec_name'
+# We can then lowercase the name and prefix with rec_ to get the id
 ##################################################################
 
 
