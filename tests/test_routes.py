@@ -407,6 +407,13 @@ class TestRecommendationServer(TestCase):
         response = self.client.get(f"{BASE_URL}?type=INVALID_TYPE")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_filter_recommendation_bad_status(self):
+        """It should return 400 when given bad recommendation type query string"""
+        recommendation = RecommendationFactory()
+        recommendation.create()
+        response = self.client.get(f"{BASE_URL}?status=INVALID_TYPE")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_like_recommendation_bad_id(self):
         """It should return 404 when sending PUT to /recommendations/rec_id/like"""
         recommendations = self._create_recommendations(1)
