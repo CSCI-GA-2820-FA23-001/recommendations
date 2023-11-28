@@ -124,7 +124,7 @@ Feature: The recommendation service back-end
         And I should see "456" in the "tgt item id" field
         And I should see "Valid" in the "Status" dropdown
     
-    Scenario: Retrieve recommendations by source_item_id and filtered by status
+    Scenario: Retrieve recommendations by source_item_id
         When I visit the "Home Page"
         And I select "Valid" in the "Status" dropdown
         And I press the "Search" button

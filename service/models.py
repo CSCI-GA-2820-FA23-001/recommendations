@@ -275,10 +275,13 @@ class Recommendation(db.Model):
         logger.info("Processing all Recommendation")
 
         qry = cls.query
-        if rec_type is not None:
-            qry = qry.filter(cls.recommendation_type == rec_type)
-        if rec_status is not None:
-            qry = qry.filter(cls.status == rec_status)
+        filters = []
+        if rec_type:
+            filters.append(Recommendation.recommendation_type == rec_type)
+        if rec_status:
+            filters.append(Recommendation.status == rec_status)
+        qry = qry.filter(db.and_(*filters))
+        db.session
 
         return qry.paginate(page=page_index, per_page=page_size, error_out=False)
 
