@@ -294,12 +294,18 @@ class Recommendation(db.Model):
         return cls.query.get_or_404(recommendation_id)
 
     @classmethod
-    def find_by_source_item_id(cls, source_item_id: int) -> list:
+    def find_by_source_item_id(cls, source_item_id: int, sort_order: str = 'desc') -> list:
         """Returns all Recommendations with the given source_item_id, sorted by recommendation_weight"""
         logger.info(
-            "Processing source id query for %s with sorting by recommendation weight...",
-            source_item_id,
+            "Processing source id query for %s with sorting by recommendation weight in %s order...",
+            source_item_id, sort_order
         )
+        if sort_order == 'asc':
+            return (
+                cls.query.filter(cls.source_item_id == source_item_id)
+                .order_by(cls.recommendation_weight.asc())
+                .all()
+            )
         return (
             cls.query.filter(cls.source_item_id == source_item_id)
             .order_by(cls.recommendation_weight.desc())
@@ -332,13 +338,16 @@ class Recommendation(db.Model):
         return cls.query.filter(cls.recommendation_type == recommendation_type)
 
     @classmethod
-    def find_valid_by_source_item_id(cls, source_item_id: int) -> list:
-        """Returns all valid recommendation with the given source_item_id"""
-        logger.info("Processing source id query for %s ...", source_item_id)
-        return cls.query.filter(
-            cls.source_item_id == source_item_id,
-            cls.status == RecommendationStatus.VALID,
-        ).all()
+    def find_valid_by_source_item_id(cls, source_item_id: int, sort_order: str = 'desc') -> list:
+        """Returns all valid recommendations with the given source_item_id, sorted by recommendation_weight"""
+        logger.info(
+            "Processing valid recommendations query for source item id %s with sorting by recommendation weight in %s order..",
+            source_item_id, sort_order
+        )
+        query = cls.query.filter(cls.source_item_id == source_item_id, cls.status == RecommendationStatus.VALID)
+        if sort_order == 'asc':
+            return query.order_by(cls.recommendation_weight.asc()).all()
+        return query.order_by(cls.recommendation_weight.desc()).all()
 
     # @classmethod
     # def find_by_target_item_id(cls, target_item_id: int) -> list:
