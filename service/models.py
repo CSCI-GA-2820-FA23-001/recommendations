@@ -281,7 +281,6 @@ class Recommendation(db.Model):
         if rec_status:
             filters.append(Recommendation.status == rec_status)
         qry = qry.filter(db.and_(*filters))
-        db.session
 
         return qry.paginate(page=page_index, per_page=page_size, error_out=False)
 
