@@ -23,7 +23,7 @@ For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
 import requests
-from behave import given  # pylint: disable=no-name-in-module
+from behave import given
 
 # HTTP Return Codes
 HTTP_200_OK = 200
