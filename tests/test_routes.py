@@ -180,8 +180,8 @@ class TestRecommendationServer(TestCase):
         response = self.client.get(f"{BASE_URL}/{test_recommendation.id}")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_read_recommendations_by_source_item_id(self):
-        """It should Get a list recommendations by its source product id"""
+    def test_read_recommendations_by_source_item_id_default_sorting(self):
+        """It should Get a list of recommendations by its source product id with default sorting"""
         recommendations = self._create_recommendations(5)
         test_source_item_id = recommendations[0].source_item_id
         category_recommendations = [
@@ -189,36 +189,82 @@ class TestRecommendationServer(TestCase):
             for recommendation in recommendations
             if recommendation.source_item_id == test_source_item_id
         ]
-        response = self.client.get(
-            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}"
-        )
+        response = self.client.get(f"{BASE_URL}/source-product?source_item_id={test_source_item_id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), len(category_recommendations))
-        # check the data just to be sure
-        for recommendation in data:
+        # Check if the recommendations are sorted by weight in descending order (default behavior)
+        sorted_recommendations = sorted(category_recommendations, key=lambda x: x.recommendation_weight, reverse=True)
+        for i, recommendation in enumerate(data):
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+            self.assertEqual(recommendation["recommendation_weight"], sorted_recommendations[i].recommendation_weight)
 
-    def test_read_valid_recommendations_by_source_item_id(self):
-        """It should get a list of valid recommendations by its source product id"""
+    def test_read_recommendations_by_source_item_id_with_sort_order(self):
+        """It should Get a list of recommendations by its source product id with explicit sort order"""
         recommendations = self._create_recommendations(5)
         test_source_item_id = recommendations[0].source_item_id
         category_recommendations = [
+            recommendation
+            for recommendation in recommendations
+            if recommendation.source_item_id == test_source_item_id
+        ]
+
+        # Test for ascending order
+        response_asc = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&sort_order=asc"
+        )
+        self.assertEqual(response_asc.status_code, status.HTTP_200_OK)
+        data_asc = response_asc.get_json()
+        sorted_recommendations_asc = sorted(category_recommendations, key=lambda x: x.recommendation_weight)
+        for i, recommendation in enumerate(data_asc):
+            self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+            self.assertEqual(recommendation["recommendation_weight"], sorted_recommendations_asc[i].recommendation_weight)
+
+        # Test for descending order
+        response_desc = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&sort_order=desc"
+        )
+        self.assertEqual(response_desc.status_code, status.HTTP_200_OK)
+        data_desc = response_desc.get_json()
+        sorted_recommendations_desc = sorted(category_recommendations, key=lambda x: x.recommendation_weight, reverse=True)
+        for i, recommendation in enumerate(data_desc):
+            self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+            self.assertEqual(recommendation["recommendation_weight"], sorted_recommendations_desc[i].recommendation_weight)
+
+    def test_read_valid_recommendations_by_source_item_id_with_sort_order(self):
+        """It should get a list of valid recommendations by its source product id with explicit sort order"""
+        recommendations = self._create_recommendations(5)
+        test_source_item_id = recommendations[0].source_item_id
+        valid_recommendations = [
             recommendation
             for recommendation in recommendations
             if recommendation.source_item_id == test_source_item_id
             and recommendation.status == RecommendationStatus.VALID
         ]
-        response = self.client.get(
-            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&status=valid"
+
+        # Test for ascending order
+        response_asc = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&status=valid&sort_order=asc"
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.get_json()
-        self.assertEqual(len(data), len(category_recommendations))
-        # check the data just to be sure
-        for recommendation in data:
+        self.assertEqual(response_asc.status_code, status.HTTP_200_OK)
+        data_asc = response_asc.get_json()
+        sorted_valid_asc = sorted(valid_recommendations, key=lambda x: x.recommendation_weight)
+        for i, recommendation in enumerate(data_asc):
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
             self.assertEqual(recommendation["status"], "VALID")
+            self.assertEqual(recommendation["recommendation_weight"], sorted_valid_asc[i].recommendation_weight)
+
+        # Test for descending order
+        response_desc = self.client.get(
+            f"{BASE_URL}/source-product?source_item_id={test_source_item_id}&status=valid&sort_order=desc"
+        )
+        self.assertEqual(response_desc.status_code, status.HTTP_200_OK)
+        data_desc = response_desc.get_json()
+        sorted_valid_recommendations_desc = sorted(valid_recommendations, key=lambda x: x.recommendation_weight, reverse=True)
+        for i, recommendation in enumerate(data_desc):
+            self.assertEqual(recommendation["source_item_id"], test_source_item_id)
+            self.assertEqual(recommendation["status"], "VALID")
+            self.assertEqual(recommendation["recommendation_weight"], sorted_valid_recommendations_desc[i].recommendation_weight)
 
     def test_get_recommendation_list(self):
         """It should Get a list of Recommendations"""
