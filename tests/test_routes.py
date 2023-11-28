@@ -260,11 +260,11 @@ class TestRecommendationServer(TestCase):
         )
         self.assertEqual(response_desc.status_code, status.HTTP_200_OK)
         data_desc = response_desc.get_json()
-        sorted_valid_recommendations_desc = sorted(valid_recommendations, key=lambda x: x.recommendation_weight, reverse=True)
+        sorted_valid_desc = sorted(valid_recommendations, key=lambda x: x.recommendation_weight, reverse=True)
         for i, recommendation in enumerate(data_desc):
             self.assertEqual(recommendation["source_item_id"], test_source_item_id)
             self.assertEqual(recommendation["status"], "VALID")
-            self.assertEqual(recommendation["recommendation_weight"], sorted_valid_recommendations_desc[i].recommendation_weight)
+            self.assertEqual(recommendation["recommendation_weight"], sorted_valid_desc[i].recommendation_weight)
 
     def test_get_recommendation_list(self):
         """It should Get a list of Recommendations"""
