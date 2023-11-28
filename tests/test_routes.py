@@ -240,9 +240,11 @@ class TestRecommendationServer(TestCase):
         for _ in range(total_pages - 1):
             rec = RecommendationFactory()
             rec.recommendation_type = "UNKNOWN"
+            rec.status = "DEPRECATED"
             rec.create()
         test_recommendation = RecommendationFactory()
         test_recommendation.recommendation_type = "UP_SELL"
+        test_recommendation.status = "VALID"
         test_recommendation.create()
 
         # should return all if page_size > total_pages
@@ -264,6 +266,25 @@ class TestRecommendationServer(TestCase):
         response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&type=UP_SELL")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()["items"]
+        self.assertEqual(len(data), 1)
+        response = self.client.get(
+            f"{BASE_URL}?page-index=1&page-size=100&status=VALID"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()["items"]
+        self.assertEqual(len(data), 1)
+        # test or logic for query
+        test_recommendation = RecommendationFactory()
+        test_recommendation.recommendation_type = "UP_SELL"
+        test_recommendation.status = "OUT_OF_STOCK"
+        test_recommendation.create()
+        response = self.client.get(
+            f"{BASE_URL}?page-index=1&page-size=100&type=UP_SELL&status=OUT_OF_STOCK"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()["items"]
+        # print("Hello")
+        # print(data)
         self.assertEqual(len(data), 1)
 
     def test_like_recommendation(self):

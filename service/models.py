@@ -268,6 +268,7 @@ class Recommendation(db.Model):
             page_index: int
             page_size: int
             rec_type: String
+            rec_status: STRING
         Returns:
             Array: filtered paginated results
         """
@@ -276,7 +277,7 @@ class Recommendation(db.Model):
         qry = cls.query
         if rec_type is not None:
             qry = qry.filter(cls.recommendation_type == rec_type)
-        elif rec_status is not None:
+        if rec_status is not None:
             qry = qry.filter(cls.status == rec_status)
 
         return qry.paginate(page=page_index, per_page=page_size, error_out=False)
