@@ -271,14 +271,18 @@ class TestRecommendationServer(TestCase):
         number = 3
         recommendations = self._create_recommendations(number)
         ids = []
+        new_ids = []
         for i in range(number):
             ids.append(recommendations[i].id)
         response = self.client.get(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()["items"]
         self.assertEqual(len(data), number)
+        # does not necessarily preserve order
         for i in range(number):
-            self.assertEqual(data[i]["id"], ids[i])
+            new_ids.append(data[i]["id"])
+        for rec_id in ids:
+            self.assertTrue(rec_id in new_ids)
 
     def test_get_recommendation_paginate(self):
         """It should Get a list of Recommendations with pagination"""
@@ -286,9 +290,11 @@ class TestRecommendationServer(TestCase):
         for _ in range(total_pages - 1):
             rec = RecommendationFactory()
             rec.recommendation_type = "UNKNOWN"
+            rec.status = "DEPRECATED"
             rec.create()
         test_recommendation = RecommendationFactory()
         test_recommendation.recommendation_type = "UP_SELL"
+        test_recommendation.status = "VALID"
         test_recommendation.create()
 
         # should return all if page_size > total_pages
@@ -306,11 +312,29 @@ class TestRecommendationServer(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()["items"]
         self.assertEqual(len(data), 5)
-        # filtering should only get back the one that we changed
+        # filtering by type only
         response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&type=UP_SELL")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()["items"]
         self.assertEqual(len(data), 1)
+        # filtering by status only
+        response = self.client.get(f"{BASE_URL}?page-index=1&page-size=10&status=VALID")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()["items"]
+        self.assertEqual(len(data), 1)
+        # test or logic for query
+        # test_recommendation = RecommendationFactory()
+        # test_recommendation.recommendation_type = "UP_SELL"
+        # test_recommendation.status = "OUT_OF_STOCK"
+        # test_recommendation.create()
+        # response = self.client.get(
+        #     f"{BASE_URL}?page-index=1&page-size=100&type=UP_SELL&status=OUT_OF_STOCK"
+        # )
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # data = response.get_json()["items"]
+        # print("Hello")
+        # print(data)
+        # self.assertEqual(len(data), 1)
 
     def test_like_recommendation(self):
         """It should Like a Recommendation"""
