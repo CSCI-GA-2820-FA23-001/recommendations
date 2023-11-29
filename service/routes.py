@@ -20,10 +20,10 @@ from . import app  # Import Flask application
 ######################################################################
 # GET HEALTH CHECK
 ######################################################################
-@app.route("/healthcheck")
-def healthcheck():
-    """Let them know our heart is still beating"""
-    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+@app.route("/health")
+def health():
+    """Health Status"""
+    return {"status": "OK"}, status.HTTP_200_OK
 
 
 ######################################################################

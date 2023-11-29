@@ -29,8 +29,8 @@ spec:
                   name: postgres-creds
                   key: password
           volumeMounts:
-          - name: postgres-storage
-            mountPath: /var/lib/postgresql/data
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
           resources:
             limits:
               cpu: "0.50"
@@ -41,16 +41,16 @@ spec:
           readinessProbe:
             exec:
               command:
-              - sh
-              - -c
-              - pg_isready -U flask -h localhost
+                - sh
+                - -c
+                - pg_isready -U flask -h localhost
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
-      - name: postgres-storage
-        persistentVolumeClaim:
-          claimName: postgres-pvc
-        # emptyDir: {}
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+          # emptyDir: {}
 
 ---
 apiVersion: v1
