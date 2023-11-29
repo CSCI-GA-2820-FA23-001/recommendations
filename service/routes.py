@@ -115,18 +115,24 @@ def get_recommendations(recommendation_id):
 @app.route("/recommendations/source-product", methods=["GET"])
 def read_recommendations_by_source_type():
     """
-    Read a list of recommendations based on the source product they select
+    Read a list of recommendations based on the source product they select,
+    with optional sorting by recommendation weight.
     """
     app.logger.info("Request for recommendations list based on source product")
     source_item_id = request.args.get("source_item_id", type=int)
+    sort_order = request.args.get("sort_order", default="desc")  # Added sorting parameter
     product_status = request.args.get("status", default=None)
-    recommendations = []
+
     if source_item_id is None:
         return jsonify({"error": "Source item ID is required"}), 400
+
+    recommendations = []
     if product_status == "valid":
-        recommendations = Recommendation.find_valid_by_source_item_id(source_item_id)
+        # Assuming find_valid_by_source_item_id also needs to be updated for sorting
+        recommendations = Recommendation.find_valid_by_source_item_id(source_item_id, sort_order)
     else:
-        recommendations = Recommendation.find_by_source_item_id(source_item_id)
+        recommendations = Recommendation.find_by_source_item_id(source_item_id, sort_order)
+
     results = [recommendation.serialize() for recommendation in recommendations]
     app.logger.info("Returning %d recommendations", len(results))
     return jsonify(results), status.HTTP_200_OK
