@@ -33,8 +33,8 @@ spec:
             ]
       containers:
         - name: recommendation
-          #image: cluster-registry:32000/recommendation:1.0
-          image: recommendation
+          image: cluster-registry:32000/recommendation:1.0
+          #image: recommendation
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
