@@ -141,6 +141,22 @@ Feature: The recommendation service back-end
         And I should see "10" in the "num of likes" field
         And I should see "Valid" in the "Status" dropdown
 
+    Scenario: Delete a recommendation
+        When I visit the "Home Page"
+        And I select "Up Sell" in the "Type" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        When I copy the "Id" field
+        And I press the "Clear" button
+        And I paste the "Id" field
+        And I press the "Delete" button
+        Then I should see the message "Recommendation has been deleted!"
+        When I copy the "Id" field
+        And I press the "Clear" button
+        When I paste the "Id" field
+        And I press the "Retrieve" button
+        Then I should see the message "404 Not Found"
+
 
 # Scenario: Create a Pet
 #     When I visit the "Home Page"
@@ -213,13 +229,3 @@ Feature: The recommendation service back-end
 #     Then I should see the message "Success"
 #     And I should see "Loki" in the results
 #     And I should not see "fido" in the results
-
-# Scenario: Delete a Pet
-#     When I visit the "Home Page"
-#     And I set the "Name" to "sammy"
-#     And I press the "Search" button
-#     Then I should see the message "Success"
-#     And I should see "sammy" in the "Name" field
-#     And I should see "snake" in the "Category" field
-#     When I press the "Delete" button
-#     Then I should see the message "Pet has been Deleted!"
