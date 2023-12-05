@@ -102,13 +102,13 @@ Feature: The recommendation service back-end
         And I should see "ACCESSORY" in the results
         And I should not see "362" in the results
         And I should not see "753" in the results
-        
+
     Scenario: Search recommendations by source_item_id and filtered by status
         When I visit the "Home Page"
         And I press the "Search" button
         Then I should see the message "Success"
         And I should see "123" in the results
-        When I press the "Clear" button 
+        When I press the "Clear" button
         And I set the "src item id" to "123"
         And I select "Valid" in the "Status" dropdown
         And I press the "Search" button
@@ -123,14 +123,14 @@ Feature: The recommendation service back-end
         And I should see "123" in the "src item id" field
         And I should see "456" in the "tgt item id" field
         And I should see "Valid" in the "Status" dropdown
-    
+
     Scenario: Retrieve recommendations by source_item_id
         When I visit the "Home Page"
         And I select "Valid" in the "Status" dropdown
         And I press the "Search" button
         Then I should see the message "Success"
         And I should see "123" in the results
-        When I press the "Clear" button 
+        When I press the "Clear" button
         And I set the "src item id" to "123"
         And I select "Valid" in the "Status" dropdown
         And I press the "retrieve-by-src-item-id" button
@@ -156,6 +156,34 @@ Feature: The recommendation service back-end
         When I paste the "Id" field
         And I press the "Retrieve" button
         Then I should see the message "404 Not Found"
+
+    Scenario: Update a Recommendation
+        When I visit the "Home Page"
+        And I set the "src item id" to "123"
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "456" in the "tgt item id" field
+        And I should see "UP_SELL" in the "type" field
+        And I should see "0.5" in the "weight" field
+        And I should see "VALID" in the "status" field
+        And I should see "10" in the "num of likes" field
+        When I change "src item id" to "996"
+        When I change "tgt item id" to "879"
+        And I press the "Update" button
+        Then I should see the message "Success"
+        When I copy the "Id" field
+        And I press the "Clear" button
+        And I paste the "Id" field
+        And I press the "Retrieve" button
+        Then I should see the message "Success"
+        And I should see "996" in the "src item id" field
+        And I should see "879" in the "tgt item id" field
+        When I press the "Clear" button
+        And I press the "Search" button
+        Then I should see the message "Success"
+        And I should see "996" in the results
+        And I should see "879" in the results
+        And I should not see "123" in the results
 
 
 # Scenario: Create a Pet
@@ -208,24 +236,3 @@ Feature: The recommendation service back-end
 #     And I should see "sammy" in the results
 #     And I should not see "leo" in the results
 
-# Scenario: Update a Pet
-#     When I visit the "Home Page"
-#     And I set the "Name" to "fido"
-#     And I press the "Search" button
-#     Then I should see the message "Success"
-#     And I should see "fido" in the "Name" field
-#     And I should see "dog" in the "Category" field
-#     When I change "Name" to "Loki"
-#     And I press the "Update" button
-#     Then I should see the message "Success"
-#     When I copy the "Id" field
-#     And I press the "Clear" button
-#     And I paste the "Id" field
-#     And I press the "Retrieve" button
-#     Then I should see the message "Success"
-#     And I should see "Loki" in the "Name" field
-#     When I press the "Clear" button
-#     And I press the "Search" button
-#     Then I should see the message "Success"
-#     And I should see "Loki" in the results
-#     And I should not see "fido" in the results

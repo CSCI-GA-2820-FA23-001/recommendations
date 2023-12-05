@@ -79,8 +79,9 @@ $(function () {
     $("#update-btn").click(function () {
 
         let rec_id = $("#rec_id").val();
-        let src_item_id = parseInt($("#src_item_id").val());
-        let tgt_item_id = parseInt($("#tgt_item_id").val());
+        let src_item_id = parseInt($("#rec_src_item_id").val());
+        console.log(src_item_id)
+        let tgt_item_id = parseInt($("#rec_tgt_item_id").val());
         let type = $("#rec_type").val();
         let status = $("#rec_status").val();
         let weight = parseFloat($("#rec_weight").val());
@@ -161,7 +162,7 @@ $(function () {
 
         ajax.done(function (res) {
             // console.log(res)
-            if (res.length>0) {
+            if (res.length > 0) {
                 update_form_data(res[0]) // src-item-id is not a unique id, so only update the form with the first returned value
                 recQuery()
             }
