@@ -11,7 +11,6 @@ import os
 import logging
 import unittest
 import random
-from datetime import datetime
 from werkzeug.exceptions import NotFound
 
 from service.models import (
@@ -160,14 +159,14 @@ class TestRecommendation(unittest.TestCase):
             recommendation.create()
 
         # Test for descending order
-        found_desc = Recommendation.find_by_source_item_id(source_item_id, 'desc')
+        found_desc = Recommendation.find_by_source_item_id(source_item_id, "desc")
         found_weights_desc = [
             recommendation.recommendation_weight for recommendation in found_desc
         ]
         self.assertEqual(found_weights_desc, sorted(weights, reverse=True))
 
         # Test for ascending order
-        found_asc = Recommendation.find_by_source_item_id(source_item_id, 'asc')
+        found_asc = Recommendation.find_by_source_item_id(source_item_id, "asc")
         found_weights_asc = [
             recommendation.recommendation_weight for recommendation in found_asc
         ]
@@ -183,38 +182,28 @@ class TestRecommendation(unittest.TestCase):
 
     def test_update_recommendation_target_item_id(self):
         """create and update recommendation with some data"""
-        recommendation = Recommendation(
-            source_item_id=123,
-            target_item_id=456,
-            recommendation_type=RecommendationType.UP_SELL,
-            recommendation_weight=0.8,
-            status=RecommendationStatus.VALID,
-        )
+        recommendation = RecommendationFactory()
         recommendation.create()
-        recommendation.update({"source_item_id": 789, "recommendation_weight": 0.2})
-        self.assertEqual(recommendation.source_item_id, 789)
-        self.assertEqual(recommendation.recommendation_weight, 0.2)
+        self.assertIsNotNone(recommendation.id)
+        new_source_item_id = recommendation.source_item_id + 8
+        recommendation.source_item_id = new_source_item_id
+        original_id = recommendation.id
+        recommendation.update()
+        self.assertEqual(recommendation.id, original_id)
+        self.assertEqual(recommendation.source_item_id, new_source_item_id)
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        recommendations = Recommendation.all()
+        self.assertEqual(len(recommendations), 1)
+        self.assertEqual(recommendations[0].id, original_id)
+        self.assertEqual(recommendations[0].source_item_id, new_source_item_id)
 
-    def test_update_recommendation_raise_error(self):
-        """update recommendation with invalid data should raise error"""
-        recommendation = Recommendation(
-            source_item_id=123,
-            target_item_id=456,
-            recommendation_type=RecommendationType.UP_SELL,
-            recommendation_weight=0.8,
-            status=RecommendationStatus.VALID,
-        )
-
-        def test_invalid_field():
-            recommendation.update({"foo": "bar"})
-            recommendation.create()
-
-        def test_invalid_value_type():
-            recommendation.update({"recommendation_weight": "foo"})
-            recommendation.create()
-
-        self.assertRaises(DataValidationError, test_invalid_field)
-        self.assertRaises(DataValidationError, test_invalid_value_type)
+    def test_update_no_id(self):
+        """It should not Update a Pet with no id"""
+        recommendation = RecommendationFactory()
+        logging.debug(recommendation)
+        recommendation.id = None
+        self.assertRaises(DataValidationError, recommendation.update)
 
     def test_delete_a_recommendation(self):
         """It should Delete a Recommendation"""
@@ -230,8 +219,7 @@ class TestRecommendation(unittest.TestCase):
         recommendation = RecommendationFactory()
         data = recommendation.serialize()
         self.assertNotEqual(data, None)
-        self.assertIn("id", data)
-        self.assertEqual(data["id"], recommendation.id)
+        self.assertNotIn("id", data)
         self.assertIn("source_item_id", data)
         self.assertEqual(data["source_item_id"], recommendation.source_item_id)
         self.assertIn("target_item_id", data)
@@ -246,14 +234,8 @@ class TestRecommendation(unittest.TestCase):
         )
         self.assertIn("status", data)
         self.assertEqual(data["status"], recommendation.status.name)
-        self.assertIn("created_at", data)
-        self.assertEqual(
-            datetime.fromisoformat(data["created_at"]), recommendation.created_at
-        )
-        self.assertIn("updated_at", data)
-        self.assertEqual(
-            datetime.fromisoformat(data["updated_at"]), recommendation.updated_at
-        )
+        self.assertNotIn("created_at", data)
+        self.assertNotIn("updated_at", data)
 
     def test_deserialize_a_recommendation(self):
         """It should de-serialize a Recommendation"""
@@ -271,12 +253,8 @@ class TestRecommendation(unittest.TestCase):
             data["recommendation_weight"], recommendation.recommendation_weight
         )
         self.assertEqual(data["status"], recommendation.status.name)
-        self.assertEqual(
-            datetime.fromisoformat(data["created_at"]), recommendation.created_at
-        )
-        self.assertEqual(
-            datetime.fromisoformat(data["updated_at"]), recommendation.updated_at
-        )
+        self.assertEqual(recommendation.created_at, None)
+        self.assertEqual(recommendation.updated_at, None)
 
     def test_deserialize_missing_data(self):
         """It should not deserialize a Recommendation with missing data"""
@@ -478,12 +456,12 @@ class TestRecommendation(unittest.TestCase):
         ]
 
         # Test for descending order (default)
-        found_desc = Recommendation.find_valid_by_source_item_id(source_item_id, 'desc')
+        found_desc = Recommendation.find_valid_by_source_item_id(source_item_id, "desc")
         found_weights_desc = [rec.recommendation_weight for rec in found_desc]
         self.assertEqual(found_weights_desc, sorted(found_weights_desc, reverse=True))
 
         # Test for ascending order
-        found_asc = Recommendation.find_valid_by_source_item_id(source_item_id, 'asc')
+        found_asc = Recommendation.find_valid_by_source_item_id(source_item_id, "asc")
         found_weights_asc = [rec.recommendation_weight for rec in found_asc]
         self.assertEqual(found_weights_asc, sorted(found_weights_asc))
 

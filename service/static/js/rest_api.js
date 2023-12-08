@@ -56,7 +56,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "POST",
-            url: "/recommendations",
+            url: "/api/recommendations",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -100,7 +100,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "PUT",
-            url: `/recommendations/${rec_id}`,
+            url: `/api/recommendations/${rec_id}`,
             contentType: "application/json",
             data: JSON.stringify(data)
         })
@@ -128,7 +128,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/recommendations/${rec_id}`,
+            url: `/api/recommendations/${rec_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -155,7 +155,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/recommendations/source-product?source_item_id=${rec_src_item_id}`,
+            url: `/api/recommendations/source-product?source_item_id=${rec_src_item_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -186,7 +186,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/recommendations/${rec_id}`,
+            url: `/api/recommendations/${rec_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -234,7 +234,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/recommendations?${queryString}`,
+            url: `/api/recommendations?${queryString}`,
             contentType: "application/json",
             data: ''
         })
