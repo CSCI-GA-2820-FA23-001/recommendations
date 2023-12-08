@@ -354,9 +354,6 @@ class ReadListResource(Resource):
         sort_order = args["sort_order"]
         product_status = args["status"]
 
-        if source_item_id is None:
-            return {"error": "Source item ID is required"}, 400
-
         recommendations = []
         if product_status == "valid":
             # Assuming find_valid_by_source_item_id also needs to be updated for sorting
