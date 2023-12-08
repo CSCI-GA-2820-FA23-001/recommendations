@@ -80,8 +80,8 @@ class Recommendation(db.Model):
     # INSTANCE METHODS
     ##################################################
 
-    def __repr__(self):
-        return f"<Recommendation with id=[{self.id}]>"
+    # def __repr__(self):
+    #     return f"<Recommendation with id=[{self.id}]>"
 
     def create(self):
         """
@@ -91,6 +91,8 @@ class Recommendation(db.Model):
             logger.info("Attempting to create Recommendation with ID %s", self.id)
             # id must be none to generate next primary key
             self.id = None  # pylint: disable=invalid-name
+            self.created_at = None
+            self.updated_at = None
             db.session.add(self)
             db.session.commit()
             logger.info("Successfully created Recommendation with ID %s", self.id)
@@ -101,20 +103,15 @@ class Recommendation(db.Model):
                 "Error creating Recommendation: " + str(error)
             ) from error
 
-    def update(self, payload: dict):
+    def update(self):
         """
-        Manually updates a Recommendation to the database
-
-        Args:
-            payload: dict, fields and values that need to be updated; must contain field id
+        Update a Recommendation to the database
         """
         logger.info("Updating %s", self.id)
         try:
             logger.info("Attempting to update Recommendation with ID %s", self.id)
-            data = self.serialize()
-            for key, value in payload.items():
-                data[key] = value
-            self.deserialize(data)
+            if not self.id:
+                raise DataValidationError("Update called with empty ID field")
             db.session.commit()
             logger.info("Successfully updated Recommendation with ID %s", self.id)
         except Exception as error:
@@ -175,17 +172,21 @@ class Recommendation(db.Model):
 
     def serialize(self):
         """Serializes a Recommendation into a dictionary"""
-        return {
-            "id": self.id,
+        recommendation = {
             "source_item_id": self.source_item_id,
             "target_item_id": self.target_item_id,
             "recommendation_type": self.recommendation_type.name,
             "recommendation_weight": self.recommendation_weight,
             "status": self.status.name,
             "number_of_likes": self.number_of_likes,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
         }
+        if self.id:
+            recommendation["id"] = self.id
+        if self.created_at:
+            recommendation["created_at"] = self.created_at.isoformat()
+        if self.updated_at:
+            recommendation["updated_at"] = self.updated_at.isoformat()
+        return recommendation
 
     def _deserialize_int_field(self, data, key):
         value = data.get(key)
@@ -208,6 +209,7 @@ class Recommendation(db.Model):
         Args:
             data (dict): A dictionary containing the resource data
         """
+        logger.info("deserialize(%s)", data)
         try:
             self.source_item_id = self._deserialize_int_field(data, "source_item_id")
             self.target_item_id = self._deserialize_int_field(data, "target_item_id")
@@ -219,10 +221,6 @@ class Recommendation(db.Model):
                 ]
             if "status" in data:
                 self.status = RecommendationStatus[data["status"].upper()]
-            if "created_at" in data:
-                self.created_at = datetime.fromisoformat(data["created_at"])
-            if "updated_at" in data:
-                self.updated_at = datetime.fromisoformat(data["updated_at"])
         except KeyError as error:
             raise DataValidationError(
                 "Invalid recommendation: missing or wrong enum value " + error.args[0]
@@ -237,6 +235,13 @@ class Recommendation(db.Model):
                 "Invalid recommendation: expected a dictionary, but got a string or other type "
                 + str(error)
             ) from error
+        # if there is no id and the data has one, assign it
+        if not self.id and "id" in data:
+            self.id = data["id"]
+        if not self.created_at and "created_at" in data:
+            self.created_at = datetime.fromisoformat(data["created_at"])
+        if not self.updated_at and "updated_at" in data:
+            self.updated_at = datetime.fromisoformat(data["updated_at"])
         return self
 
     ##################################################
@@ -297,13 +302,16 @@ class Recommendation(db.Model):
         return cls.query.get_or_404(recommendation_id)
 
     @classmethod
-    def find_by_source_item_id(cls, source_item_id: int, sort_order: str = 'desc') -> list:
+    def find_by_source_item_id(
+        cls, source_item_id: int, sort_order: str = "desc"
+    ) -> list:
         """Returns all Recommendations with the given source_item_id, sorted by recommendation_weight"""
         logger.info(
             "Processing source id query for %s with sorting by recommendation weight in %s order...",
-            source_item_id, sort_order
+            source_item_id,
+            sort_order,
         )
-        if sort_order == 'asc':
+        if sort_order == "asc":
             return (
                 cls.query.filter(cls.source_item_id == source_item_id)
                 .order_by(cls.recommendation_weight.asc())
@@ -341,14 +349,20 @@ class Recommendation(db.Model):
         return cls.query.filter(cls.recommendation_type == recommendation_type)
 
     @classmethod
-    def find_valid_by_source_item_id(cls, source_item_id: int, sort_order: str = 'desc') -> list:
+    def find_valid_by_source_item_id(
+        cls, source_item_id: int, sort_order: str = "desc"
+    ) -> list:
         """Returns all valid recommendations with the given source_item_id, sorted by recommendation_weight"""
         logger.info(
             "Processing valid recommendations query for source item id %s with sorting by recommendation weight in %s order..",
-            source_item_id, sort_order
+            source_item_id,
+            sort_order,
         )
-        query = cls.query.filter(cls.source_item_id == source_item_id, cls.status == RecommendationStatus.VALID)
-        if sort_order == 'asc':
+        query = cls.query.filter(
+            cls.source_item_id == source_item_id,
+            cls.status == RecommendationStatus.VALID,
+        )
+        if sort_order == "asc":
             return query.order_by(cls.recommendation_weight.asc()).all()
         return query.order_by(cls.recommendation_weight.desc()).all()
 

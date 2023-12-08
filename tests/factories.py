@@ -15,7 +15,6 @@
 """
 Test Factory to make fake objects for testing
 """
-from datetime import datetime
 
 import factory
 from factory.fuzzy import FuzzyInteger, FuzzyChoice, FuzzyFloat
@@ -29,8 +28,6 @@ class RecommendationFactory(factory.Factory):
         """Maps factory to data model"""
 
         model = Recommendation
-
-    id = factory.Sequence(lambda n: n)
 
     source_item_id = FuzzyInteger(1, 200)
 
@@ -60,6 +57,3 @@ class RecommendationFactory(factory.Factory):
     )
 
     number_of_likes = 0
-
-    created_at = factory.LazyFunction(datetime.utcnow)
-    updated_at = factory.LazyFunction(datetime.utcnow)

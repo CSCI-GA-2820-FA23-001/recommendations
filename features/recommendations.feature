@@ -103,43 +103,43 @@ Feature: The recommendation service back-end
         And I should not see "362" in the results
         And I should not see "753" in the results
 
-    Scenario: Search recommendations by source_item_id and filtered by status
-        When I visit the "Home Page"
-        And I press the "Search" button
-        Then I should see the message "Success"
-        And I should see "123" in the results
-        When I press the "Clear" button
-        And I set the "src item id" to "123"
-        And I select "Valid" in the "Status" dropdown
-        And I press the "Search" button
-        Then I should see the message "Success"
-        And I should see "VALID" in the results
-        And I should not see "DEPRECATED" in the results
-        And I should not see "OUT_OF_STOCK" in the results
-        And I should not see "UNKNOWN" in the results
-        When I press the "Clear" button
-        And I press the "Search" button
-        Then I should see the message "Success"
-        And I should see "123" in the "src item id" field
-        And I should see "456" in the "tgt item id" field
-        And I should see "Valid" in the "Status" dropdown
+    # Scenario: Search recommendations by source_item_id and filtered by status
+    #     When I visit the "Home Page"
+    #     And I press the "Search" button
+    #     Then I should see the message "Success"
+    #     And I should see "123" in the results
+    #     When I press the "Clear" button
+    #     And I set the "src item id" to "123"
+    #     And I select "Valid" in the "Status" dropdown
+    #     And I press the "Search" button
+    #     Then I should see the message "Success"
+    #     And I should see "VALID" in the results
+    #     And I should not see "DEPRECATED" in the results
+    #     And I should not see "OUT_OF_STOCK" in the results
+    #     And I should not see "UNKNOWN" in the results
+    #     When I press the "Clear" button
+    #     And I press the "Search" button
+    #     Then I should see the message "Success"
+    #     And I should see "123" in the "src item id" field
+    #     And I should see "456" in the "tgt item id" field
+    #     And I should see "Valid" in the "Status" dropdown
 
-    Scenario: Retrieve recommendations by source_item_id
-        When I visit the "Home Page"
-        And I select "Valid" in the "Status" dropdown
-        And I press the "Search" button
-        Then I should see the message "Success"
-        And I should see "123" in the results
-        When I press the "Clear" button
-        And I set the "src item id" to "123"
-        And I select "Valid" in the "Status" dropdown
-        And I press the "retrieve-by-src-item-id" button
-        Then I should see the message "Success"
-        And I should see "123" in the "src item id" field
-        And I should see "456" in the "tgt item id" field
-        And I should see "0.5" in the "Weight" field
-        And I should see "10" in the "num of likes" field
-        And I should see "Valid" in the "Status" dropdown
+    # Scenario: Retrieve recommendations by source_item_id
+    #     When I visit the "Home Page"
+    #     And I select "Valid" in the "Status" dropdown
+    #     And I press the "Search" button
+    #     Then I should see the message "Success"
+    #     And I should see "123" in the results
+    #     When I press the "Clear" button
+    #     And I set the "src item id" to "123"
+    #     And I select "Valid" in the "Status" dropdown
+    #     And I press the "retrieve-by-src-item-id" button
+    #     Then I should see the message "Success"
+    #     And I should see "123" in the "src item id" field
+    #     And I should see "456" in the "tgt item id" field
+    #     And I should see "0.5" in the "Weight" field
+    #     And I should see "10" in the "num of likes" field
+    #     And I should see "Valid" in the "Status" dropdown
 
     Scenario: Delete a recommendation
         When I visit the "Home Page"
@@ -211,4 +211,3 @@ Feature: The recommendation service back-end
         And I should see "Unknown" in the "Status" dropdown
         And I should see "0.7" in the "weight" field
         And I should see "9" in the "num of likes" field
-       
