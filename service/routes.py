@@ -137,11 +137,11 @@ sp_args.add_argument(
     help="Filter recommendations by status",
 )
 
-
-
 ######################################################################
 #  PATH: /recommendations/{id}
 ######################################################################
+
+
 @api.route("/recommendations/<rec_id>")
 @api.param("rec_id", "The Recommendation identifier")
 class RecommendationResource(Resource):
@@ -374,6 +374,8 @@ class ReadListResource(Resource):
 ######################################################################
 #  PATH: /recommendations/<int:recommendation_id>/deactivation
 ######################################################################
+
+
 @api.route("/recommendations/<int:recommendation_id>/deactivation")
 @api.param("recommendation_id", "The Recommendation identifier")
 class DeactivationResource(Resource):
@@ -396,6 +398,8 @@ class DeactivationResource(Resource):
 ######################################################################
 #  PATH: /recommendations/<int:recommendation_id>/activation
 ######################################################################
+
+
 @api.route("/recommendations/<int:recommendation_id>/activation")
 @api.param("recommendation_id", "The Recommendation identifier")
 class ActivationResource(Resource):
