@@ -112,11 +112,36 @@ rec_args.add_argument(
     default=None,
     help="Filter recommendations by status",
 )
-
+sp_args = reqparse.RequestParser()
+sp_args.add_argument(
+    "source_item_id",
+    type=int,
+    location="args",
+    required=True,
+    help="Source item id of the Recommendation",
+)
+sp_args.add_argument(
+    "sort_order",
+    type=str,
+    location="args",
+    required=False,
+    default="desc",
+    help="Sort recommendations by weight",
+)
+sp_args.add_argument(
+    "status",
+    type=str,
+    location="args",
+    required=False,
+    default=None,
+    help="Filter recommendations by status",
+)
 
 ######################################################################
 #  PATH: /recommendations/{id}
 ######################################################################
+
+
 @api.route("/recommendations/<rec_id>")
 @api.param("rec_id", "The Recommendation identifier")
 class RecommendationResource(Resource):
@@ -225,7 +250,6 @@ class RecommendationCollection(Resource):
         page_size = args["page-size"]
         rec_type = args["type"]
         rec_status = args["status"]
-        print(page_index, page_size, rec_type, rec_status)
 
         if rec_type is not None:
             app.logger.info("Find by recommendation type: %s", rec_type)
@@ -310,74 +334,93 @@ class LikeResource(Resource):
         return recommendation.serialize(), status.HTTP_200_OK
 
 
-# @app.route("/recommendations/source-product", methods=["GET"])
-# def read_recommendations_by_source_type():
-#     """
-#     Read a list of recommendations based on the source product they select,
-#     with optional sorting by recommendation weight.
-#     """
-#     app.logger.info("Request for recommendations list based on source product")
-#     source_item_id = request.args.get("source_item_id", type=int)
-#     sort_order = request.args.get(
-#         "sort_order", default="desc"
-#     )  # Added sorting parameter
-#     product_status = request.args.get("status", default=None)
+######################################################################
+#  PATH: /recommendations/source-product
+######################################################################
+@api.route("/recommendations/source-product", strict_slashes=False)
+class ReadListResource(Resource):
+    """Handles all interactions with collections of Recommendations with given source product"""
+    @api.doc("read_recommendations_by_source_type")
+    @api.expect(sp_args, validate=True)
+    @api.response(400, "Source item ID is required")
+    def get(self):
+        """
+        Read a list of recommendations based on the source product they select,
+        with optional sorting by recommendation weight.
+        """
+        app.logger.info("Request for recommendations list based on source product")
+        args = sp_args.parse_args()
+        source_item_id = args["source_item_id"]
+        sort_order = args["sort_order"]
+        product_status = args["status"]
 
-#     if source_item_id is None:
-#         return jsonify({"error": "Source item ID is required"}), 400
+        recommendations = []
+        if product_status == "valid":
+            # Assuming find_valid_by_source_item_id also needs to be updated for sorting
+            recommendations = Recommendation.find_valid_by_source_item_id(
+                source_item_id, sort_order
+            )
+        else:
+            recommendations = Recommendation.find_by_source_item_id(
+                source_item_id, sort_order
+            )
 
-#     recommendations = []
-#     if product_status == "valid":
-#         # Assuming find_valid_by_source_item_id also needs to be updated for sorting
-#         recommendations = Recommendation.find_valid_by_source_item_id(
-#             source_item_id, sort_order
-#         )
-#     else:
-#         recommendations = Recommendation.find_by_source_item_id(
-#             source_item_id, sort_order
-#         )
-
-#     results = [recommendation.serialize() for recommendation in recommendations]
-#     app.logger.info("Returning %d recommendations", len(results))
-#     return jsonify(results), status.HTTP_200_OK
-
-
-# ######################################################################
-# # Activate and Deactivate a RECOMMENDATION
-# ######################################################################
-# @app.route("/recommendations/<int:recommendation_id>/deactivation", methods=["PUT"])
-# def deactivate_recommendation(recommendation_id):
-#     """
-#     Deactivate a Recommendation
-#     """
-#     app.logger.info(
-#         "Request to deactivate recommendation with id: %s", recommendation_id
-#     )
-#     recommendation = Recommendation.find(recommendation_id)
-#     if not recommendation:
-#         abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
-#     recommendation.deactivate()
-
-#     return jsonify(recommendation.serialize()), status.HTTP_200_OK
+        results = [recommendation.serialize() for recommendation in recommendations]
+        app.logger.info("Returning %d recommendations", len(results))
+        return results, status.HTTP_200_OK
+######################################################################
+#  PATH: /recommendations/<int:recommendation_id>/deactivation
+######################################################################
 
 
-# @app.route("/recommendations/<int:recommendation_id>/activation", methods=["PUT"])
-# def activate_recommendation(recommendation_id):
-#     """
-#     Activate a Recommendation
-#     """
-#     app.logger.info("Request to activate recommendation with id: %s", recommendation_id)
-#     activated_status = request.args.get("status", default=None)
-#     valid_status = ["VALID", "OUT_OF_STOCK"]
-#     recommendation = Recommendation.find(recommendation_id)
-#     if not recommendation:
-#         abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
-#     if activated_status not in valid_status:
-#         abort(status.HTTP_400_BAD_REQUEST, "status for activation is required")
-#     recommendation.activate(activated_status)
+@api.route("/recommendations/<int:recommendation_id>/deactivation")
+@api.param("recommendation_id", "The Recommendation identifier")
+class DeactivationResource(Resource):
+    """Deactivate actions on a Recommendation"""
 
-#     return jsonify(recommendation.serialize()), status.HTTP_200_OK
+    @api.doc("deactivate_recommendation")
+    @api.response(404, "Recommendation not found")
+    def put(self, recommendation_id):
+        """
+        Deactivate a Recommendation
+        """
+        app.logger.info(
+            "Request to deactivate recommendation with id: %s", recommendation_id
+        )
+        recommendation = Recommendation.find(recommendation_id)
+        if not recommendation:
+            abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+        recommendation.deactivate()
+        return recommendation.serialize(), status.HTTP_200_OK
+######################################################################
+#  PATH: /recommendations/<int:recommendation_id>/activation
+######################################################################
 
+
+@api.route("/recommendations/<int:recommendation_id>/activation")
+@api.param("recommendation_id", "The Recommendation identifier")
+class ActivationResource(Resource):
+    """Activate actions on a Recommendation"""
+
+    @api.doc("activate_recommendation")
+    @api.expect(rec_args, validate=True)
+    @api.response(404, "Recommendation not found")
+    def put(self, recommendation_id):
+        """
+        Activate a Recommendation
+        """
+        app.logger.info("Request to activate recommendation with id: %s", recommendation_id)
+        args = rec_args.parse_args()
+        activated_status = args["status"]
+        valid_status = ["VALID", "OUT_OF_STOCK"]
+        recommendation = Recommendation.find(recommendation_id)
+        if not recommendation:
+            abort(status.HTTP_404_NOT_FOUND, "recommendation not found")
+        if activated_status not in valid_status:
+            abort(status.HTTP_400_BAD_REQUEST, "status for activation is required")
+        recommendation.activate(activated_status)
+
+        return recommendation.serialize(), status.HTTP_200_OK
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
