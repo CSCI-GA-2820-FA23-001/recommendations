@@ -11,6 +11,7 @@ import os
 import logging
 import unittest
 import random
+from datetime import datetime
 from werkzeug.exceptions import NotFound
 
 from service.models import (
@@ -255,6 +256,32 @@ class TestRecommendation(unittest.TestCase):
         self.assertEqual(data["status"], recommendation.status.name)
         self.assertEqual(recommendation.created_at, None)
         self.assertEqual(recommendation.updated_at, None)
+
+    def test_deserialize_a_recommendation_with_id_and_datetime(self):
+        """It should de-serialize a Recommendation"""
+        data = RecommendationFactory().serialize()
+        data["id"] = 188
+        data["created_at"] = "2023-12-08T15:30:00"
+        data["updated_at"] = "2024-11-08T15:30:00"
+        recommendation = Recommendation()
+        recommendation.deserialize(data)
+        self.assertNotEqual(recommendation, None)
+        self.assertEqual(recommendation.id, data["id"])
+        self.assertEqual(data["source_item_id"], recommendation.source_item_id)
+        self.assertEqual(data["target_item_id"], recommendation.target_item_id)
+        self.assertEqual(
+            data["recommendation_type"], recommendation.recommendation_type.name
+        )
+        self.assertEqual(
+            data["recommendation_weight"], recommendation.recommendation_weight
+        )
+        self.assertEqual(data["status"], recommendation.status.name)
+        self.assertEqual(
+            recommendation.created_at, datetime.fromisoformat(data["created_at"])
+        )
+        self.assertEqual(
+            recommendation.updated_at, datetime.fromisoformat(data["updated_at"])
+        )
 
     def test_deserialize_missing_data(self):
         """It should not deserialize a Recommendation with missing data"""

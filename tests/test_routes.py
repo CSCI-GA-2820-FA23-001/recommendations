@@ -511,10 +511,18 @@ class TestRecommendationServer(TestCase):
         response = self.client.delete(BASE_URL)
         self.assertEqual(response.status_code, 405)
 
+    def test_update_recommendation_bad_id(self):
+        """Update a Recommendation with bad formatted id"""
+        resp = self.client.put(
+            f"{BASE_URL}/foo",
+            json={},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_update_recommendation_not_found(self):
         """Update a Recommendation that doesn't exist"""
         resp = self.client.put(
-            f"{BASE_URL}/foo",
+            f"{BASE_URL}/1999999999",
             json={},
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
