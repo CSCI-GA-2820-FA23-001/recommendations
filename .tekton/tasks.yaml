@@ -169,7 +169,7 @@ spec:
     type: string
     default: $(params.BASE_URL)
   steps:
-    - name: run-behave
+    - name: behave
       image: docker.io/rofrano/pipeline-selenium
       workingDir: /workspace/source 
       command: ["/bin/bash", "-c"]
