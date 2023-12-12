@@ -1,0 +1,21 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: recommendation
+build:
+  artifacts:
+    - image: recommendation
+      docker:
+        dockerfile: Dockerfile
+test:
+  - context: .
+    image: recommendation
+    custom:
+      - command: green
+manifests:
+  rawYaml:
+    - k8s/deployment.yaml
+    - k8s/ingress.yaml
+    - k8s/postgresql.yaml
+    - k8s/pv.yaml
+    - k8s/service.yaml
