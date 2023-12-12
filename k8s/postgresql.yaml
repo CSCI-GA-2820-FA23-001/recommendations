@@ -86,8 +86,10 @@ spec:
 # export DATABASE_URI='postgresql://<place-url-to-database-here>'
 # If using psycopg2 == 3.1.12,
 #   'postgresql+psycopg://<place-url-to-database-here>'
+# 
 # export POSTGRES_PASSWORD='<place-password-here>'
-#
+# 
+# 
 # kubectl create secret generic postgres-creds \
 #     --from-literal=password=$POSTGRES_PASSWORD
 #     --from-literal=database_uri=$DATABASE_URI
