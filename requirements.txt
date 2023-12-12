@@ -1,5 +1,5 @@
 # Pinned dependencies that cause breakage
-Werkzeug==2.3.3
+Werkzeug==3.0.1
 SQLAlchemy==2.0.0
 
 # Runtime dependencies
@@ -7,6 +7,7 @@ Flask==2.3.2
 flask-restx==1.1.0
 Flask-SQLAlchemy==3.0.2
 psycopg[binary]==3.1.12
+retry2==0.9.5
 python-dotenv==0.21.1
 
 # Runtime tools
