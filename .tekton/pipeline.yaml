@@ -174,5 +174,3 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
-  workspaces:
-      - name: pipeline-workspace
