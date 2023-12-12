@@ -1,7 +1,8 @@
 ##################################################
 # Create a builder image to compile in
 ##################################################
-FROM python:3.11-slim as builder
+# FROM python:3.11-slim as builder
+FROM rofrano/nyu-devops-base:fa23
 
 # Added libraries for PostgreSQL before pip install
 RUN apt-get update && apt-get install -y gcc libpq-dev
@@ -17,7 +18,8 @@ RUN python -m venv venv && \
 ##################################################
 # Create production image from builder image
 ##################################################
-FROM python:3.11-slim
+# FROM python:3.11-slim
+FROM rofrano/nyu-devops-base:fa23
 
 # Install Postgres libraries
 RUN apt-get update && apt-get install -y postgresql-client
@@ -40,8 +42,6 @@ USER flask
 ENV FLASK_APP=service:app
 ENV PORT 8080
 EXPOSE $PORT
-
-ENV PATH=/home/vscode/.local/bin
 
 ENV GUNICORN_BIND 0.0.0.0:$PORT
 ENTRYPOINT ["gunicorn"]
