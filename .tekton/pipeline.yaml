@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   creationTimestamp: '2023-12-12T01:52:46Z'
-  generation: 10
+  generation: 11
   managedFields:
     - apiVersion: tekton.dev/v1
       fieldsType: FieldsV1
@@ -15,10 +15,10 @@ metadata:
           'f:workspaces': {}
       manager: Mozilla
       operation: Update
-      time: '2023-12-12T16:26:17Z'
+      time: '2023-12-12T16:32:27Z'
   name: recommendation-pipeline
   namespace: xh1131-dev
-  resourceVersion: '3512996511'
+  resourceVersion: '3513017613'
   uid: f80b777d-563b-4f00-a489-91ef71f38a4a
 spec:
   params:
@@ -165,7 +165,7 @@ spec:
     - name: deploy-image
       params:
         - name: old_image_name
-          value: 'cluster-registry:32000/petshop:latest'
+          value: 'cluster-registry:32000/recommendation:latest'
         - name: image_name
           value: $(params.IMAGE_NAME)
         - name: manifest_dir
@@ -192,5 +192,3 @@ spec:
           workspace: recommendation-pipeline-workspace
   workspaces:
     - name: recommendation-pipeline-workspace
-      optional: false
-  finally: []
