@@ -34,7 +34,7 @@ spec:
       default: "database_uri"
   steps:
     - name: green
-      image: rofrano/nyu-devops-base:fa23
+      image: python:3.11-slim
       workingDir: $(workspaces.source.path)
       env:
        - name: DATABASE_URI
