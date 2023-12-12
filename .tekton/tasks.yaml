@@ -34,7 +34,7 @@ spec:
       default: "database_uri"
   steps:
     - name: green
-      image: rofrano/nyu-devops-base:fa23
+      image: docker.io/rofrano/nyu-devops-base:fa23
       workingDir: $(workspaces.source.path)
       env:
        - name: DATABASE_URI
