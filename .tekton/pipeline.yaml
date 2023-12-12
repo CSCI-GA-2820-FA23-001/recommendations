@@ -27,7 +27,7 @@ spec:
       description: The name of the image to build
       name: IMAGE_NAME
       type: string
-    - default: 'cluster-registry:32000/recommendation:latest'
+    - default: 'cluster-registry:32000/recommendations:latest'
       description: The name of the old image to build
       name: OLD_IMAGE_NAME
       type: string
