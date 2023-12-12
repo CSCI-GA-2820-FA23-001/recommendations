@@ -34,7 +34,7 @@ spec:
       default: "database_uri"
   steps:
     - name: green
-      image: python:3.11-slim
+      image: rofrano/nyu-devops-base:fa23
       workingDir: $(workspaces.source.path)
       env:
        - name: DATABASE_URI
@@ -48,7 +48,7 @@ spec:
 
         echo "***** Installing dependencies *****"
         python -m pip install --upgrade pip wheel
-        pip install -qr requirements.txt
+        sudo pip install -qr requirements.txt
 
         echo "***** Running Tests *****"
         green $(params.ARGS)
@@ -182,7 +182,7 @@ spec:
             set -e
             echo "***** Installing dependencies *****"
             python -m pip install --upgrade pip wheel
-            pip install -qr requirements.txt
+            sudo pip install -qr requirements.txt
 
             echo "\n*** STARTING APPLICATION ***\n"
             sleep 30
