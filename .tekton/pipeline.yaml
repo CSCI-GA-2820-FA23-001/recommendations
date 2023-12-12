@@ -1,41 +1,25 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  creationTimestamp: '2023-12-12T01:52:46Z'
-  generation: 11
-  managedFields:
-    - apiVersion: tekton.dev/v1
-      fieldsType: FieldsV1
-      fieldsV1:
-        'f:spec':
-          .: {}
-          'f:finally': {}
-          'f:params': {}
-          'f:tasks': {}
-          'f:workspaces': {}
-      manager: Mozilla
-      operation: Update
-      time: '2023-12-12T16:32:27Z'
-  name: recommendation-pipeline
-  namespace: xh1131-dev
-  resourceVersion: '3513017613'
-  uid: f80b777d-563b-4f00-a489-91ef71f38a4a
+  name: cd-pipeline
 spec:
+  workspaces:
+    - name: pipeline-workspace
   params:
-    - default: 'https://github.com/CSCI-GA-2820-FA23-001/recommendations.git'
-      description: URL to git repo being cloned
+    - default: https://github.com/CSCI-GA-2820-FA23-001/recommendations.git
+      description: The URL to the git repo
       name: GIT_REPO
       type: string
-    - default: master
-      description: the reference (branch)
+    - default: 31-CD-to-OpenShift-Kubernetes
+      description: The reference (branch or ref)
       name: GIT_REF
       type: string
-    - default: ' -vvv --processes=1 --run-coverage --minimum-coverage=95'
-      description: args for green TDD
-      name: ARGS
+    - default: '-vvv --processes=1 --run-coverage --minimum-coverage=95'
+      description: Arguments for green testing
+      name: GREEN_ARGS
       type: string
     - default: recommendation
-      description: name of application
+      description: Name of the application
       name: APP_NAME
       type: string
     - default: >-
@@ -43,12 +27,12 @@ spec:
       description: The name of the image to build
       name: IMAGE_NAME
       type: string
-    - default: 'cluster-registry:32000/$(params.APP_NAME):latest'
-      description: The name of old image
+    - default: 'cluster-registry:32000/recommendation:latest'
+      description: The name of the old image to build
       name: OLD_IMAGE_NAME
       type: string
     - default: >-
-        https://cd-recommendations-xh1131-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com
+        https://recommendations-service.apps.sandbox-m2.ll9k.p1.openshiftapps.com/
       description: The base url to the microservice
       name: BASE_URL
       type: string
@@ -85,7 +69,7 @@ spec:
           value: 'true'
         - name: gitInitImage
           value: >-
-            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:c4b2183f7c7997bd401d86b33eefb637b3ef2fa90618e875106292cd69a15c14
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
         - name: userHome
           value: /home/git
       taskRef:
@@ -93,11 +77,11 @@ spec:
         name: git-clone
       workspaces:
         - name: output
-          workspace: recommendation-pipeline-workspace
+          workspace: pipeline-workspace
     - name: pylint
       params:
         - name: image
-          value: 'docker.io/python:3.11-slim'
+          value: 'docker.io/rofrano/nyu-devops-base:fa23'
         - name: path
           value: service
         - name: requirements_file
@@ -113,11 +97,11 @@ spec:
         name: pylint
       workspaces:
         - name: source
-          workspace: recommendation-pipeline-workspace
-    - name: green
+          workspace: pipeline-workspace
+    - name: testing
       params:
         - name: ARGS
-          value: '-vvv --processes=1 --run-coverage --minimum-coverage=95'
+          value: $(params.GREEN_ARGS)
         - name: SECRET_NAME
           value: postgres-creds
         - name: SECRET_KEY
@@ -129,14 +113,14 @@ spec:
         name: green
       workspaces:
         - name: source
-          workspace: recommendation-pipeline-workspace
+          workspace: pipeline-workspace
     - name: buildah
       params:
         - name: IMAGE
           value: $(params.IMAGE_NAME)
         - name: BUILDER_IMAGE
           value: >-
-            registry.redhat.io/rhel8/buildah@sha256:55f5c7d88c77e1ab5a2ab8e877172b2b66cb196e21f10dc45148470d0ee8bbae
+            registry.redhat.io/rhel8/buildah@sha256:00795fafdab9bbaa22cd29d1faa1a01e604e4884a2c935c1bf8e3d1f0ad1c084
         - name: STORAGE_DRIVER
           value: vfs
         - name: DOCKERFILE
@@ -155,17 +139,17 @@ spec:
           value: 'false'
       runAfter:
         - pylint
-        - green
+        - testing
       taskRef:
         kind: ClusterTask
         name: buildah
       workspaces:
         - name: source
-          workspace: recommendation-pipeline-workspace
+          workspace: pipeline-workspace
     - name: deploy-image
       params:
         - name: old_image_name
-          value: 'cluster-registry:32000/recommendation:latest'
+          value: 'cluster-registry:32000/petshop:latest'
         - name: image_name
           value: $(params.IMAGE_NAME)
         - name: manifest_dir
@@ -177,7 +161,7 @@ spec:
         name: deploy-image
       workspaces:
         - name: source
-          workspace: recommendation-pipeline-workspace
+          workspace: pipeline-workspace
     - name: behave
       params:
         - name: BASE_URL
@@ -189,6 +173,6 @@ spec:
         name: behave
       workspaces:
         - name: source
-          workspace: recommendation-pipeline-workspace
+          workspace: pipeline-workspace
   workspaces:
-    - name: recommendation-pipeline-workspace
+      - name: pipeline-workspace
