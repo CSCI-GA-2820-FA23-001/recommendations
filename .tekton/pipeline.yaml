@@ -1,0 +1,190 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  creationTimestamp: '2023-12-12T01:52:46Z'
+  generation: 7
+  managedFields:
+    - apiVersion: tekton.dev/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:finally': {}
+          'f:params': {}
+          'f:tasks': {}
+          'f:workspaces': {}
+      manager: Mozilla
+      operation: Update
+      time: '2023-12-12T03:10:18Z'
+  name: recommendation-pipeline
+  namespace: xh1131-dev
+  resourceVersion: '3510279378'
+  uid: f80b777d-563b-4f00-a489-91ef71f38a4a
+spec:
+  params:
+    - description: URL to git repo being cloned
+      name: GIT_REPO
+      type: string
+    - default: master
+      description: the reference (branch)
+      name: GIT_REF
+      type: string
+    - description: args for green TDD
+      name: GREEN_ARGS
+      type: string
+    - default: recommendation
+      description: name of application
+      name: APP_NAME
+      type: string
+    - default: >-
+        image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest
+      description: The name of the image to build
+      name: IMAGE_NAME
+      type: string
+    - default: 'cluster-registry:32000/$(params.APP_NAME):latest'
+      description: The name of old image
+      name: OLD_IMAGE_NAME
+      type: string
+    - description: The base url to the microservice
+      name: BASE_URL
+      type: string
+  tasks:
+    - name: git-clone
+      params:
+        - name: url
+          value: $(params.GIT_REPO)
+        - name: revision
+          value: $(params.GIT_REF)
+        - name: refspec
+          value: ''
+        - name: submodules
+          value: 'true'
+        - name: depth
+          value: '1'
+        - name: sslVerify
+          value: 'true'
+        - name: crtFileName
+          value: ca-bundle.crt
+        - name: subdirectory
+          value: ''
+        - name: sparseCheckoutDirectories
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: httpProxy
+          value: ''
+        - name: httpsProxy
+          value: ''
+        - name: noProxy
+          value: ''
+        - name: verbose
+          value: 'true'
+        - name: gitInitImage
+          value: >-
+            registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:c4b2183f7c7997bd401d86b33eefb637b3ef2fa90618e875106292cd69a15c14
+        - name: userHome
+          value: /home/git
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: recommendation-pipeline-workspace
+    - name: pylint
+      params:
+        - name: image
+          value: 'docker.io/python:3.11-slim'
+        - name: path
+          value: service
+        - name: requirements_file
+          value: requirements.txt
+        - name: args
+          value: []
+        - name: pip_conf_file
+          value: pip.conf
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: pylint
+      workspaces:
+        - name: source
+          workspace: recommendation-pipeline-workspace
+    - name: green
+      params:
+        - name: ARGS
+          value: '-vvv --processes=1 --run-coverage --minimum-coverage=95'
+        - name: SECRET_NAME
+          value: postgres-creds
+        - name: SECRET_KEY
+          value: database_uri
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: green
+      workspaces:
+        - name: source
+          workspace: recommendation-pipeline-workspace
+    - name: buildah
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: BUILDER_IMAGE
+          value: >-
+            registry.redhat.io/rhel8/buildah@sha256:55f5c7d88c77e1ab5a2ab8e877172b2b66cb196e21f10dc45148470d0ee8bbae
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+        - name: TLSVERIFY
+          value: 'true'
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ''
+        - name: PUSH_EXTRA_ARGS
+          value: ''
+        - name: SKIP_PUSH
+          value: 'false'
+      runAfter:
+        - pylint
+        - green
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: recommendation-pipeline-workspace
+    - name: deploy-image
+      params:
+        - name: old_image_name
+          value: 'cluster-registry:32000/petshop:latest'
+        - name: image_name
+          value: $(params.IMAGE_NAME)
+        - name: manifest_dir
+          value: k8s
+      runAfter:
+        - buildah
+      taskRef:
+        kind: Task
+        name: deploy-image
+      workspaces:
+        - name: source
+          workspace: recommendation-pipeline-workspace
+    - name: behave
+      params:
+        - name: BASE_URL
+          value: $(params.BASE_URL)
+      runAfter:
+        - deploy-image
+      taskRef:
+        kind: Task
+        name: behave
+      workspaces:
+        - name: source
+          workspace: recommendation-pipeline-workspace
+  workspaces:
+    - name: recommendation-pipeline-workspace
