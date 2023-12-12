@@ -41,6 +41,8 @@ ENV FLASK_APP=service:app
 ENV PORT 8080
 EXPOSE $PORT
 
+ENV PATH=/home/vscode/.local/bin
+
 ENV GUNICORN_BIND 0.0.0.0:$PORT
 ENTRYPOINT ["gunicorn"]
 CMD ["--log-level=info", "service:app"]
