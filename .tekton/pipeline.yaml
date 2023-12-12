@@ -18,7 +18,7 @@ spec:
       description: Arguments for green testing
       name: GREEN_ARGS
       type: string
-    - default: recommendation
+    - default: recommendations
       description: Name of the application
       name: APP_NAME
       type: string
@@ -32,7 +32,7 @@ spec:
       name: OLD_IMAGE_NAME
       type: string
     - default: >-
-        https://recommendations-service.apps.sandbox-m2.ll9k.p1.openshiftapps.com/
+        https://recommendations-xh1131-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com
       description: The base url to the microservice
       name: BASE_URL
       type: string
@@ -149,7 +149,7 @@ spec:
     - name: deploy-image
       params:
         - name: old_image_name
-          value: 'cluster-registry:32000/petshop:latest'
+          value: $(params.OLD_IMAGE_NAME)
         - name: image_name
           value: $(params.IMAGE_NAME)
         - name: manifest_dir
