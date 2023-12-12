@@ -140,6 +140,16 @@ Feature: The recommendation service back-end
         And I should see "0.5" in the "Weight" field
         And I should see "10" in the "num of likes" field
         And I should see "Valid" in the "Status" dropdown
+    
+    Scenario: Retrieve recommendations by source_item_id that does not exist
+        When I visit the "Home Page"
+        And I select "Valid" in the "Status" dropdown
+        And I press the "Search" button
+        Then I should see the message "Success"
+        When I press the "Clear" button
+        And I set the "src item id" to "1"
+        And I press the "retrieve-by-src-item-id" button
+        Then I should see the message "No recommendations found!"
 
     Scenario: Delete a recommendation
         When I visit the "Home Page"

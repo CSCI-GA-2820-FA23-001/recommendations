@@ -165,8 +165,11 @@ $(function () {
             if (res.length > 0) {
                 update_form_data(res[0]) // src-item-id is not a unique id, so only update the form with the first returned value
                 recQuery()
+                flash_message("Success")
             }
-            flash_message("Success")
+            else {
+                flash_message("No recommendations found!")
+            }
         });
 
         ajax.fail(function (res) {
