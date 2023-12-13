@@ -19,8 +19,6 @@ spec:
       labels:
         app: recommendations
     spec:
-      imagePullSecrets:
-        - name: all-icr-io
       restartPolicy: Always
       initContainers:
         - name: check-postgres

@@ -43,7 +43,7 @@ spec:
               command:
                 - sh
                 - -c
-                - pg_isready -U flask -h localhost
+                - pg_isready -U postgres -h localhost
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
