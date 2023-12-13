@@ -305,9 +305,11 @@ class Recommendation(db.Model):
     def find_by_source_item_id(
         cls, source_item_id: int, sort_order: str = "desc"
     ) -> list:
-        """Returns all Recommendations with the given source_item_id, sorted by recommendation_weight"""
+        """Returns all Recommendations with the given source_item_id,
+        sorted by recommendation_weight"""
         logger.info(
-            "Processing source id query for %s with sorting by recommendation weight in %s order...",
+            """Processing source id query for %s
+             sorting by rec weight in %s order...""",
             source_item_id,
             sort_order,
         )
@@ -352,9 +354,11 @@ class Recommendation(db.Model):
     def find_valid_by_source_item_id(
         cls, source_item_id: int, sort_order: str = "desc"
     ) -> list:
-        """Returns all valid recommendations with the given source_item_id, sorted by recommendation_weight"""
+        """Returns all valid recommendations with the given
+         source_item_id, sorted by recommendation_weight"""
         logger.info(
-            "Processing valid recommendations query for source item id %s with sorting by recommendation weight in %s order..",
+            """Processing valid recommendations query for source item id %s
+            with sorting by recommendation weight in %s order.""",
             source_item_id,
             sort_order,
         )

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: recommendation
+  name: recommendations
 spec:
   selector:
-    app: recommendation
+    app: recommendations
   type: ClusterIP
   internalTrafficPolicy: Local
   ports:

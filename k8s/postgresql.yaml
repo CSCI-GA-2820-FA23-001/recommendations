@@ -30,7 +30,7 @@ spec:
                   key: password
           volumeMounts:
             - name: postgres-storage
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           resources:
             limits:
               cpu: "0.50"
@@ -43,7 +43,7 @@ spec:
               command:
                 - sh
                 - -c
-                - pg_isready -U flask -h localhost
+                - pg_isready -U postgres -h localhost
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
@@ -59,11 +59,11 @@ metadata:
   name: postgres-pvc
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  storageClassName: ""
+  # storageClassName: ""
 
 ---
 apiVersion: v1
@@ -84,8 +84,11 @@ spec:
 # This secret can also be created from the command line using environment variables
 #
 # export DATABASE_URI='postgresql://<place-url-to-database-here>'
+# Question: If using psycopg2 == 3.1.12, 'postgresql+psycopg://<place-url-to-database-here>'
+# 
 # export POSTGRES_PASSWORD='<place-password-here>'
-#
+# 
+# 
 # kubectl create secret generic postgres-creds \
 #     --from-literal=password=$POSTGRES_PASSWORD
 #     --from-literal=database_uri=$DATABASE_URI
@@ -96,5 +99,4 @@ metadata:
   name: postgres-creds
 data:
   password: cG9zdGdyZXM=
-  # password: czNjcjN0LWtleS1zaGhoaA==
   database_uri: cG9zdGdyZXNxbDovL3Bvc3RncmVzOnBvc3RncmVzQHBvc3RncmVzOjU0MzIvcG9zdGdyZXM=

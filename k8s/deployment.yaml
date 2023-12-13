@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recommendation
+  name: recommendations
   labels:
-    app: recommendation
+    app: recommendations
 spec:
   replicas: 2
   strategy:
@@ -13,14 +13,12 @@ spec:
       maxUnavailable: 50%
   selector:
     matchLabels:
-      app: recommendation
+      app: recommendations
   template:
     metadata:
       labels:
-        app: recommendation
+        app: recommendations
     spec:
-      imagePullSecrets:
-        - name: all-icr-io
       restartPolicy: Always
       initContainers:
         - name: check-postgres
@@ -32,8 +30,8 @@ spec:
               "until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done;",
             ]
       containers:
-        - name: recommendation
-          image: cluster-registry:32000/recommendation:1.0
+        - name: recommendations
+          image: cluster-registry:32000/recommendations:latest
           #image: recommendation
           imagePullPolicy: IfNotPresent
           ports:
