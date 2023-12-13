@@ -1,15 +1,15 @@
 apiVersion: skaffold/v4beta7
 kind: Config
 metadata:
-  name: recommendation
+  name: recommendations
 build:
   artifacts:
-    - image: recommendation
+    - image: recommendations
       docker:
         dockerfile: Dockerfile
 test:
   - context: .
-    image: recommendation
+    image: recommendations
     custom:
       - command: green
 manifests:
