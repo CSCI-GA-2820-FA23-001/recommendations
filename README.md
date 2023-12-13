@@ -20,6 +20,8 @@ Goals to implement:
 * Get recommendations based on user preference
 * Regularly update recommendation, based on product validity, sponsorship from seller, price changes, etc.
 * Create / Delete recommendation
+  
+foo
 
 ## Contents
 
