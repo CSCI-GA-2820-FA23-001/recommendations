@@ -33,7 +33,7 @@ spec:
             ]
       containers:
         - name: recommendations
-          image: cluster-registry:32000/recommendations:1.0
+          image: cluster-registry:32000/recommendations:latest
           #image: recommendation
           imagePullPolicy: IfNotPresent
           ports:
